@@ -1,0 +1,1074 @@
+{
+  "digital": {
+    "commonMain": [
+      {
+        "off": 12,
+        "label": "Tone Level",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 20,
+        "label": "Voice",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 31,
+        "label": "Ring Mod",
+        "min": 0,
+        "max": 2
+      },
+      {
+        "off": 46,
+        "label": "Unison",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 60,
+        "label": "Unison Size",
+        "min": 0,
+        "max": 3
+      },
+      {
+        "off": 52,
+        "label": "Analog Feel",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 53,
+        "label": "Wave Shape",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 54,
+        "label": "Category",
+        "min": 0,
+        "max": 40
+      }
+    ],
+    "commonPlay": [
+      {
+        "off": 18,
+        "label": "Portamento",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 49,
+        "label": "Porta Mode",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 19,
+        "label": "Porta Time",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 50,
+        "label": "Legato",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 21,
+        "label": "Octave Shift",
+        "min": 61,
+        "max": 67
+      },
+      {
+        "off": 22,
+        "label": "Bend Up",
+        "min": 0,
+        "max": 24
+      },
+      {
+        "off": 23,
+        "label": "Bend Down",
+        "min": 0,
+        "max": 24
+      }
+    ],
+    "osc": [
+      {
+        "off": 3,
+        "label": "Pitch (semi)",
+        "min": 40,
+        "max": 88
+      },
+      {
+        "off": 4,
+        "label": "Detune (cent)",
+        "min": 14,
+        "max": 114
+      },
+      {
+        "off": 6,
+        "label": "Pulse Width",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 5,
+        "label": "PW Mod Depth",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 42,
+        "label": "PW Shift",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 58,
+        "label": "SuperSaw Detune",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 52,
+        "label": "PCM Gain",
+        "min": 0,
+        "max": 3,
+        "options": [
+          "-6 dB",
+          "0 dB",
+          "+6 dB",
+          "+12 dB"
+        ]
+      },
+      {
+        "off": 53,
+        "label": "PCM Wave Number",
+        "min": 1,
+        "max": 160,
+        "bytes": 4,
+        "options": [
+          "001",
+          "002",
+          "003",
+          "004",
+          "005",
+          "006",
+          "007",
+          "008",
+          "009",
+          "010",
+          "011",
+          "012",
+          "013",
+          "014",
+          "015",
+          "016",
+          "017",
+          "018",
+          "019",
+          "020",
+          "021",
+          "022",
+          "023",
+          "024",
+          "025",
+          "026",
+          "027",
+          "028",
+          "029",
+          "030",
+          "031",
+          "032",
+          "033",
+          "034",
+          "035",
+          "036",
+          "037",
+          "038",
+          "039",
+          "040",
+          "041",
+          "042",
+          "043",
+          "044",
+          "045",
+          "046",
+          "047",
+          "048",
+          "049",
+          "050",
+          "051",
+          "052",
+          "053",
+          "054",
+          "055",
+          "056",
+          "057",
+          "058",
+          "059",
+          "060",
+          "061",
+          "062",
+          "063",
+          "064",
+          "065",
+          "066",
+          "067",
+          "068",
+          "069",
+          "070",
+          "071",
+          "072",
+          "073",
+          "074",
+          "075",
+          "076",
+          "077",
+          "078",
+          "079",
+          "080",
+          "081",
+          "082",
+          "083",
+          "084",
+          "085",
+          "086",
+          "087",
+          "088",
+          "089",
+          "090",
+          "091",
+          "092",
+          "093",
+          "094",
+          "095",
+          "096",
+          "097",
+          "098",
+          "099",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108",
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116",
+          "117",
+          "118",
+          "119",
+          "120",
+          "121",
+          "122",
+          "123",
+          "124",
+          "125",
+          "126",
+          "127",
+          "128",
+          "129",
+          "130",
+          "131",
+          "132",
+          "133",
+          "134",
+          "135",
+          "136",
+          "137",
+          "138",
+          "139",
+          "140",
+          "141",
+          "142",
+          "143",
+          "144",
+          "145",
+          "146",
+          "147",
+          "148",
+          "149",
+          "150",
+          "151",
+          "152",
+          "153",
+          "154",
+          "155",
+          "156",
+          "157",
+          "158",
+          "159",
+          "160"
+        ]
+      }
+    ],
+    "pitchEnv": [
+      {
+        "off": 7,
+        "label": "Attack",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 8,
+        "label": "Decay",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 9,
+        "label": "Depth",
+        "min": 1,
+        "max": 127
+      }
+    ],
+    "filterMain": [
+      {
+        "off": 10,
+        "label": "Type",
+        "min": 0,
+        "max": 7
+      },
+      {
+        "off": 11,
+        "label": "Slope",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 12,
+        "label": "Cutoff",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 15,
+        "label": "Resonance",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 13,
+        "label": "Key Follow",
+        "min": 54,
+        "max": 74
+      },
+      {
+        "off": 20,
+        "label": "Env Depth",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 14,
+        "label": "Env Vel",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 57,
+        "label": "HPF Cutoff",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 48,
+        "label": "AFT Sens",
+        "min": 1,
+        "max": 127
+      }
+    ],
+    "filterEnv": [
+      {
+        "off": 16,
+        "label": "Attack",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 17,
+        "label": "Decay",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 18,
+        "label": "Sustain",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 19,
+        "label": "Release",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "ampMain": [
+      {
+        "off": 21,
+        "label": "Level",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 22,
+        "label": "Vel Sens",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 60,
+        "label": "Key Follow",
+        "min": 54,
+        "max": 74
+      },
+      {
+        "off": 49,
+        "label": "AFT Sens",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 27,
+        "label": "Pan",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "ampEnv": [
+      {
+        "off": 23,
+        "label": "Attack",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 24,
+        "label": "Decay",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 25,
+        "label": "Sustain",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 26,
+        "label": "Release",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "lfo": [
+      {
+        "off": 28,
+        "label": "Shape",
+        "min": 0,
+        "max": 5
+      },
+      {
+        "off": 29,
+        "label": "Rate",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 30,
+        "label": "Tempo Sync",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 31,
+        "label": "Sync Note",
+        "min": 0,
+        "max": 19
+      },
+      {
+        "off": 32,
+        "label": "Fade",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 33,
+        "label": "Key Trigger",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 34,
+        "label": "Pitch",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 35,
+        "label": "Filter",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 36,
+        "label": "Amp",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 37,
+        "label": "Pan",
+        "min": 1,
+        "max": 127
+      }
+    ],
+    "modLfo": [
+      {
+        "off": 38,
+        "label": "Shape",
+        "min": 0,
+        "max": 5
+      },
+      {
+        "off": 39,
+        "label": "Rate",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 59,
+        "label": "Rate Ctrl",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 40,
+        "label": "Tempo Sync",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 41,
+        "label": "Sync Note",
+        "min": 0,
+        "max": 19
+      },
+      {
+        "off": 44,
+        "label": "Pitch",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 45,
+        "label": "Filter",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 46,
+        "label": "Amp",
+        "min": 1,
+        "max": 127
+      },
+      {
+        "off": 47,
+        "label": "Pan",
+        "min": 1,
+        "max": 127
+      }
+    ]
+  },
+  "analog": {
+    "play": [
+      {
+        "off": 49,
+        "label": "Portamento",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 50,
+        "label": "Porta Time",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 51,
+        "label": "Legato",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 52,
+        "label": "Octave Shift",
+        "min": 61,
+        "max": 67
+      },
+      {
+        "off": 53,
+        "label": "Bend Up",
+        "min": 0,
+        "max": 24
+      },
+      {
+        "off": 54,
+        "label": "Bend Down",
+        "min": 0,
+        "max": 24
+      }
+    ],
+    "osc": [
+      {
+        "off": 22,
+        "label": "Waveform",
+        "min": 0,
+        "max": 2
+      },
+      {
+        "off": 31,
+        "label": "Sub Oscillator",
+        "min": 0,
+        "max": 2
+      },
+      {
+        "off": 23,
+        "label": "Pitch (semi)",
+        "min": 40,
+        "max": 88
+      },
+      {
+        "off": 24,
+        "label": "Detune (cent)",
+        "min": 14,
+        "max": 114
+      },
+      {
+        "off": 25,
+        "label": "Pulse Width",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 26,
+        "label": "PW Mod Depth",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "pitchEnv": [
+      {
+        "off": 27,
+        "label": "Vel Sens",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 28,
+        "label": "Attack",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 29,
+        "label": "Decay",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 30,
+        "label": "Depth",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "filter": [
+      {
+        "off": 32,
+        "label": "Filter",
+        "min": 0,
+        "max": 1
+      },
+      {
+        "off": 33,
+        "label": "Cutoff",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 35,
+        "label": "Resonance",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 34,
+        "label": "Key Follow",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 41,
+        "label": "Env Depth",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 36,
+        "label": "Env Vel",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "filterEnv": [
+      {
+        "off": 37,
+        "label": "Attack",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 38,
+        "label": "Decay",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 39,
+        "label": "Sustain",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 40,
+        "label": "Release",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "amp": [
+      {
+        "off": 42,
+        "label": "Level",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 43,
+        "label": "Key Follow",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 44,
+        "label": "Vel Sens",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "ampEnv": [
+      {
+        "off": 45,
+        "label": "Attack",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 46,
+        "label": "Decay",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 47,
+        "label": "Sustain",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 48,
+        "label": "Release",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "lfo": [
+      {
+        "off": 13,
+        "label": "Shape",
+        "min": 0,
+        "max": 5
+      },
+      {
+        "off": 14,
+        "label": "Rate",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 16,
+        "label": "Tempo Sync",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 17,
+        "label": "Sync Note",
+        "min": 0,
+        "max": 19
+      },
+      {
+        "off": 15,
+        "label": "Fade",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 21,
+        "label": "Key Trigger",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 18,
+        "label": "Pitch",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 19,
+        "label": "Filter",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 20,
+        "label": "Amp",
+        "min": 0,
+        "max": 127
+      }
+    ],
+    "lfoCtrl": [
+      {
+        "off": 56,
+        "label": "Pitch Ctrl",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 57,
+        "label": "Filter Ctrl",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 58,
+        "label": "Amp Ctrl",
+        "min": 0,
+        "max": 127
+      },
+      {
+        "off": 59,
+        "label": "Rate Ctrl",
+        "min": 0,
+        "max": 127
+      }
+    ]
+  },
+  "arp": {
+    "main": [
+      {
+        "off": 3,
+        "label": "Arpeggio",
+        "min": 0,
+        "max": 1,
+        "toggle": true
+      },
+      {
+        "off": 5,
+        "label": "Style",
+        "min": 0,
+        "max": 127,
+        "options": [
+          "Style 1",
+          "Style 2",
+          "Style 3",
+          "Style 4",
+          "Style 5",
+          "Style 6",
+          "Style 7",
+          "Style 8",
+          "Style 9",
+          "Style 10",
+          "Style 11",
+          "Style 12",
+          "Style 13",
+          "Style 14",
+          "Style 15",
+          "Style 16",
+          "Style 17",
+          "Style 18",
+          "Style 19",
+          "Style 20",
+          "Style 21",
+          "Style 22",
+          "Style 23",
+          "Style 24",
+          "Style 25",
+          "Style 26",
+          "Style 27",
+          "Style 28",
+          "Style 29",
+          "Style 30",
+          "Style 31",
+          "Style 32",
+          "Style 33",
+          "Style 34",
+          "Style 35",
+          "Style 36",
+          "Style 37",
+          "Style 38",
+          "Style 39",
+          "Style 40",
+          "Style 41",
+          "Style 42",
+          "Style 43",
+          "Style 44",
+          "Style 45",
+          "Style 46",
+          "Style 47",
+          "Style 48",
+          "Style 49",
+          "Style 50",
+          "Style 51",
+          "Style 52",
+          "Style 53",
+          "Style 54",
+          "Style 55",
+          "Style 56",
+          "Style 57",
+          "Style 58",
+          "Style 59",
+          "Style 60",
+          "Style 61",
+          "Style 62",
+          "Style 63",
+          "Style 64",
+          "Style 65",
+          "Style 66",
+          "Style 67",
+          "Style 68",
+          "Style 69",
+          "Style 70",
+          "Style 71",
+          "Style 72",
+          "Style 73",
+          "Style 74",
+          "Style 75",
+          "Style 76",
+          "Style 77",
+          "Style 78",
+          "Style 79",
+          "Style 80",
+          "Style 81",
+          "Style 82",
+          "Style 83",
+          "Style 84",
+          "Style 85",
+          "Style 86",
+          "Style 87",
+          "Style 88",
+          "Style 89",
+          "Style 90",
+          "Style 91",
+          "Style 92",
+          "Style 93",
+          "Style 94",
+          "Style 95",
+          "Style 96",
+          "Style 97",
+          "Style 98",
+          "Style 99",
+          "Style 100",
+          "Style 101",
+          "Style 102",
+          "Style 103",
+          "Style 104",
+          "Style 105",
+          "Style 106",
+          "Style 107",
+          "Style 108",
+          "Style 109",
+          "Style 110",
+          "Style 111",
+          "Style 112",
+          "Style 113",
+          "Style 114",
+          "Style 115",
+          "Style 116",
+          "Style 117",
+          "Style 118",
+          "Style 119",
+          "Style 120",
+          "Style 121",
+          "Style 122",
+          "Style 123",
+          "Style 124",
+          "Style 125",
+          "Style 126",
+          "Style 127",
+          "Style 128"
+        ]
+      },
+      {
+        "off": 6,
+        "label": "Motif",
+        "min": 0,
+        "max": 11
+      },
+      {
+        "off": 1,
+        "label": "Grid",
+        "min": 0,
+        "max": 8
+      },
+      {
+        "off": 2,
+        "label": "Duration",
+        "min": 0,
+        "max": 9
+      },
+      {
+        "off": 7,
+        "label": "Octave Range",
+        "min": 61,
+        "max": 67
+      },
+      {
+        "off": 9,
+        "label": "Accent Rate",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "off": 10,
+        "label": "Velocity (0 = REAL)",
+        "min": 0,
+        "max": 127
+      }
+    ]
+  }
+}
