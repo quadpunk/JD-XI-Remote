@@ -78,6 +78,9 @@ class Sequencer(val engine: MidiEngine, ctx: Context) {
         saveTo("cur")
     }
 
+    /** Persist the current pattern (used after drag edits in the grid). */
+    fun commit() = saveTo("cur")
+
     fun clearTrack(t: SeqTrack) { t.notes.clear(); saveTo("cur") }
     fun clearAll() { tracks.forEach { it.notes.clear() }; saveTo("cur") }
 

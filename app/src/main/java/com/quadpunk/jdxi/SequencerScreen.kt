@@ -2,7 +2,8 @@ package com.quadpunk.jdxi
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -188,12 +189,65 @@ fun StepGrid(seq: Sequencer, track: SeqTrack, page: Int, base: Int, vel: Int, le
         Canvas(
             Modifier.weight(1f).height(cellH * rows)
                 .pointerInput(track.id, page, base, vel, len) {
-                    detectTapGestures { off ->
+                    // Tap = add/remove a note. Drag sideways = draw a long note (melodic) or paint hits (drums);
+                    // dragging from an existing note resizes it.
+                    awaitEachGesture {
+                        val down = awaitFirstDown()
                         val colW = size.width / 16f
                         val rowH = size.height / rows.toFloat()
-                        val c = (off.x / colW).toInt().coerceIn(0, 15)
-                        val r = (off.y / rowH).toInt().coerceIn(0, rows - 1)
-                        seq.toggle(track, page * 16 + c, keyOf(r), vel, len)
+                        val col = { x: Float -> (x / colW).toInt().coerceIn(0, 15) }
+                        val r = (down.position.y / rowH).toInt().coerceIn(0, rows - 1)
+                        val key = keyOf(r)
+                        val c0 = col(down.position.x)
+                        val s0 = page * 16 + c0
+                        val maxStep = seq.length - 1
+                        val covering = track.notes.firstOrNull { it.key == key && s0 >= it.step && s0 < it.step + it.len }
+                        var working: StepNote? = covering
+                        var cur = c0
+                        var moved = false
+                        var cancelled = false
+                        while (true) {
+                            val ev = awaitPointerEvent()
+                            val ch = ev.changes.firstOrNull { it.id == down.id } ?: break
+                            if (!ch.pressed) break
+                            // a vertical scroll of the page took over the gesture: do nothing
+                            if (!moved && ch.isConsumed) { cancelled = true; break }
+                            val cc = col(ch.position.x)
+                            if (cc != cur) {
+                                cur = cc
+                                val sc = page * 16 + cc
+                                if (track.drum) {
+                                    if (!moved && covering == null) track.notes.add(StepNote(s0, key, vel, 1))
+                                    moved = true
+                                    if (track.notes.none { it.step == sc && it.key == key }) track.notes.add(StepNote(sc, key, vel, 1))
+                                } else {
+                                    moved = true
+                                    val start = if (covering != null) covering.step else min(s0, sc)
+                                    val end = if (covering != null) sc else maxOf(s0, sc)
+                                    val newLen = (end - start + 1).coerceIn(1, maxStep - start + 1)
+                                    val old = working
+                                    val base0 = old ?: StepNote(start, key, vel, newLen)
+                                    val upd = base0.copy(step = start, len = newLen)
+                                    if (old != null) track.notes.remove(old)
+                                    track.notes.add(upd)
+                                    working = upd
+                                }
+                            }
+                            if (moved) ch.consume()
+                        }
+                        if (cancelled) return@awaitEachGesture
+                        if (!moved) {
+                            if (track.drum || covering == null) seq.toggle(track, s0, key, vel, len)
+                            else { track.notes.remove(covering); seq.commit() }
+                        } else {
+                            val w = working
+                            if (w != null && !track.drum) {
+                                // a drawn/resized note replaces anything it now overlaps at the same pitch
+                                track.notes.removeAll { it !== w && it != w && it.key == key && it.step < w.step + w.len && it.step + it.len > w.step }
+                                if (covering == null) seq.engine.audition(track.channel, key, vel)
+                            }
+                            seq.commit()
+                        }
                     }
                 }
         ) {

@@ -39,6 +39,9 @@ class WebMidiBridge(
         engine.sendTo(id, unhex(hex), delayMs)
     }
 
+    /** Called by android-midi.js with the page's current Appearance theme name. */
+    @JavascriptInterface fun setTheme(name: String) { web.post { Jd.theme = name } }
+
     /** Called by android-midi.js when a tab in the page's tab strip is chosen; topHeight = bottom edge of that strip in CSS px. */
     @JavascriptInterface fun pageChanged(page: String, topHeight: Double) {
         web.post { pageChanged(page, topHeight.toFloat()) }

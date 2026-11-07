@@ -70,7 +70,7 @@ document.addEventListener('click',e=>{
    and tells the app how tall that is; the app then shows its own sequencer underneath. */
 (()=>{
 const st=document.createElement('style');
-st.textContent='body.native-seq main,body.native-seq footer,body.native-seq #mixer,body.native-seq #viz:not(.full){display:none!important}body.native-seq{min-height:0!important;overflow:hidden}';
+st.textContent='body.native-seq main,body.native-seq footer,body.native-seq #mixer,body.native-seq #viz:not(.full){display:none!important}body.native-seq{min-height:0!important;overflow:hidden}#install-btn,#install-tip{display:none!important}';
 document.documentElement.appendChild(st);
 function report(page){
  const body=document.body;
@@ -89,5 +89,13 @@ document.addEventListener('click',e=>{
 window.addEventListener('jdxi-layout',()=>{if(document.body.classList.contains('native-seq'))report('sequencer')});
 /* used by the native back button */
 window.__jdxiShowPage=page=>{const b=document.querySelector('#nav button[data-page="'+page+'"]');if(b)b.click()};
+})();
+
+/* tell the app which Appearance theme is active so the native sequencer uses the same colours */
+(()=>{
+const send=()=>{try{B.setTheme(document.documentElement.dataset.theme||'droid')}catch{}};
+send();
+new MutationObserver(send).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+document.addEventListener('DOMContentLoaded',send);
 })();
 })();
