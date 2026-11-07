@@ -1,3 +1,6 @@
+Webapp also available without install for all platforms:
+https://jdxi-remote.wasmer.app/
+
 # JD-Xi Remote for Android
 
 **A powerful MIDI controller, sound editor, performance tool and step sequencer for the Roland JD-Xi synthesizer.**
