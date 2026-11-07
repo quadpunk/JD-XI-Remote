@@ -7,13 +7,15 @@
 
 JD-Xi Remote brings deeper control of the Roland JD-Xi to your Android phone or tablet. Edit sounds, control effects, manage patches, create sequences and perform live using an interface designed to make the JD-Xi more accessible and enjoyable.
 
+<img width="2664" height="2664" alt="1794056801101" src="https://github.com/user-attachments/assets/f773ddb4-96bf-4a07-927b-c616f8f5698e" />
+
 The app communicates directly with the synthesizer over USB MIDI, using standard MIDI messages and Roland SysEx for detailed parameter control.
 
 Whether you're designing sounds, building patterns or performing live, JD-Xi Remote gives you more hands-on control without constantly navigating the synthesizer's small display and menus.
 
 ## Features
 
-### 🎹 Synthesizer & Sound Editor
+### Synthesizer & Sound Editor
 
 Explore and edit the JD-Xi's sound engine through a visual interface.
 
