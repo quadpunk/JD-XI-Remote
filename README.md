@@ -1,5 +1,5 @@
-Webapp also available without install for all platforms:
-https://jdxi-remote.wasmer.app/
+# Webapp also available without install for all platforms:
+# https://jdxi-remote.wasmer.app/
 
 # JD-Xi Remote for Android
 
