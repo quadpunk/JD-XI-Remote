@@ -65,4 +65,27 @@ document.addEventListener('click',e=>{
   .then(([b64,type])=>{if(!B.saveFile(name,b64,type||'application/octet-stream'))alert('Could not save '+name)})
   .catch(err=>alert('Could not save '+name+': '+err.message));
 },true);
+
+/* The "Step sequencer" tab is replaced by the native sequencer: when it is chosen the page collapses to header + tab strip
+   and tells the app how tall that is; the app then shows its own sequencer underneath. */
+(()=>{
+const st=document.createElement('style');
+st.textContent='body.native-seq main,body.native-seq footer,body.native-seq #mixer,body.native-seq #viz:not(.full){display:none!important}body.native-seq{min-height:0!important;overflow:hidden}';
+document.documentElement.appendChild(st);
+function report(page){
+ const body=document.body;
+ if(page!=='sequencer'){body.classList.remove('native-seq');B.pageChanged(page,0);return}
+ body.classList.add('native-seq');window.scrollTo(0,0);
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  const nav=document.getElementById('nav');
+  B.pageChanged('sequencer',Math.ceil(nav.getBoundingClientRect().bottom)+2);
+ }));
+}
+document.addEventListener('click',e=>{
+ const b=e.target&&e.target.closest?e.target.closest('#nav button[data-page]'):null;
+ if(b)report(b.dataset.page);
+},true);
+/* used by the native back button */
+window.__jdxiShowPage=page=>{const b=document.querySelector('#nav button[data-page="'+page+'"]');if(b)b.click()};
+})();
 })();

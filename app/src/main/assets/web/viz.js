@@ -412,7 +412,7 @@ cv.addEventListener('click',()=>{if(full){nextMode(1);showBar()}});
 window.addEventListener('keydown',e=>{
  if(!on||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
  if(e.key==='Escape'&&full)setFull(false);
- else if(e.key==='f'||e.key==='F'){if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&$('performance').classList.contains('active')){e.preventDefault();setFull(!full)}}
+ else if(e.key==='f'||e.key==='F'){if(!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();setFull(!full)}}
  else if(full&&(e.key==='ArrowRight'||e.key===' ')){e.preventDefault();nextMode(1);showBar()}
  else if(full&&e.key==='ArrowLeft'){e.preventDefault();nextMode(-1);showBar()}
 });

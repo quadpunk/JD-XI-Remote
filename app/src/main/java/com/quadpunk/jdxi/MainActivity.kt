@@ -33,14 +33,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -57,7 +56,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var engine: MidiEngine
     private lateinit var seq: Sequencer
     private lateinit var web: WebView
+    /** 0 = normal web page, 1 = the web "Step sequencer" tab is selected and replaced by the native sequencer. */
     private var tab by mutableIntStateOf(0)
+    /** Height (in dp = CSS px) of the web header + tab strip, which stays visible above the native sequencer. */
+    private var webTopHeight by mutableFloatStateOf(0f)
 
     private var customView: View? = null
     private var customCallback: WebChromeClient.CustomViewCallback? = null
@@ -88,7 +90,7 @@ class MainActivity : ComponentActivity() {
             override fun handleOnBackPressed() {
                 when {
                     customView != null -> hideCustomView()
-                    tab != 0 -> tab = 0
+                    tab != 0 -> web.evaluateJavascript("window.__jdxiShowPage&&window.__jdxiShowPage('performance')", null)
                     else -> { isEnabled = false; onBackPressedDispatcher.onBackPressed() }
                 }
             }
@@ -98,30 +100,28 @@ class MainActivity : ComponentActivity() {
             JdTheme {
                 val tablet = LocalConfiguration.current.screenWidthDp >= 720
                 Column(Modifier.fillMaxSize().background(Jd.bg).systemBarsPadding().imePadding()) {
-                    Box(Modifier.weight(1f).fillMaxWidth()) {
-                        // The WebView stays alive (just hidden) while the sequencer tab is open, so the remote keeps its state.
-                        AndroidView(
-                            factory = { web },
-                            modifier = Modifier.fillMaxSize(),
-                            update = { it.visibility = if (tab == 0) View.VISIBLE else View.INVISIBLE },
-                        )
-                        if (tab == 1) {
-                            Column(Modifier.fillMaxSize().background(Jd.bg)) {
-                                Text(engine.status, fontSize = 12.sp, color = Jd.textLo, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp))
-                                SequencerScreen(seq, tablet)
-                            }
+                    // The WebView is the Remote app. It stays alive the whole time. While its "Step sequencer" tab is
+                    // selected it shrinks to just the header + tab strip and the native sequencer fills the rest.
+                    AndroidView(
+                        factory = { web },
+                        modifier = if (tab == 1) Modifier.fillMaxWidth().height(webTopHeight.dp)
+                                   else Modifier.fillMaxWidth().weight(1f),
+                    )
+                    if (tab == 1) {
+                        Column(Modifier.weight(1f).fillMaxWidth().background(Jd.bg)) {
+                            Text(engine.status, fontSize = 12.sp, color = Jd.textLo, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp))
+                            SequencerScreen(seq, tablet)
                         }
-                    }
-                    NavigationBar(containerColor = Jd.surface) {
-                        val colors = NavigationBarItemDefaults.colors(indicatorColor = Jd.surface2)
-                        NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, colors = colors,
-                            icon = { Text("🎛") }, label = { Text("Remote") })
-                        NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, colors = colors,
-                            icon = { Text("▦") }, label = { Text("Sequencer") })
                     }
                 }
             }
         }
+    }
+
+    /** Called (on the UI thread) by the page whenever the user switches tab in the Remote's tab strip. */
+    private fun onWebPageChanged(page: String, topHeightPx: Float) {
+        if (page == "sequencer" && topHeightPx > 0f) { webTopHeight = topHeightPx; tab = 1 }
+        else tab = 0
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
                 setSupportZoom(false)
                 textZoom = 100
             }
-            addJavascriptInterface(WebMidiBridge(engine, this, ::saveToDownloads), "AndroidMidi")
+            addJavascriptInterface(WebMidiBridge(engine, this, ::saveToDownloads, ::onWebPageChanged), "AndroidMidi")
 
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =

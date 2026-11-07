@@ -10,6 +10,7 @@ class WebMidiBridge(
     private val engine: MidiEngine,
     private val web: WebView,
     private val save: (name: String, bytes: ByteArray, mime: String) -> Boolean,
+    private val pageChanged: (page: String, topHeightPx: Float) -> Unit,
 ) {
     private val openInputs = ConcurrentHashMap.newKeySet<String>()
 
@@ -36,6 +37,11 @@ class WebMidiBridge(
 
     @JavascriptInterface fun send(id: String, hex: String, delayMs: Double) {
         engine.sendTo(id, unhex(hex), delayMs)
+    }
+
+    /** Called by android-midi.js when a tab in the page's tab strip is chosen; topHeight = bottom edge of that strip in CSS px. */
+    @JavascriptInterface fun pageChanged(page: String, topHeight: Double) {
+        web.post { pageChanged(page, topHeight.toFloat()) }
     }
 
     /** Called by android-midi.js for <a download> links (patch exports, captured MIDI files). */
