@@ -484,3 +484,10 @@ html.viz-full,html.viz-full body{overflow:hidden}
 .editor-control input.editor-toggle:checked::after{transform:translateX(20px);background:#14161c}
 .editor-control input.editor-toggle:disabled{opacity:.45;cursor:not-allowed}
 .editor-control input.editor-toggle:focus-visible{outline:2px solid #6ce4f4;outline-offset:2px}
+
+/* hide/show the top area (title bar, mixer; the visualizer has its own switch) with one button */
+#topstrip{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:4px 10px}
+#topstrip #top-toggle{padding:4px 10px;font-size:12px;border-radius:8px}
+#topstatus{font-size:12px;opacity:.75;margin-right:auto}
+#topstatus[hidden]{display:none}
+body.top-hidden header,body.top-hidden #mixer{display:none!important}

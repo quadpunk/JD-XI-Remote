@@ -85,6 +85,8 @@ document.addEventListener('click',e=>{
  const b=e.target&&e.target.closest?e.target.closest('#nav button[data-page]'):null;
  if(b)report(b.dataset.page);
 },true);
+/* the top area was hidden/shown while the native sequencer is open: re-measure the strip */
+window.addEventListener('jdxi-layout',()=>{if(document.body.classList.contains('native-seq'))report('sequencer')});
 /* used by the native back button */
 window.__jdxiShowPage=page=>{const b=document.querySelector('#nav button[data-page="'+page+'"]');if(b)b.click()};
 })();
