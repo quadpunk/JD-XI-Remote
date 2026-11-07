@@ -1,0 +1,78 @@
+name: Build Android app
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to attach the APK to a GitHub Release on tags
+
+jobs:
+  web-check:
+    name: Check web app scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax-check every JS file
+        run: |
+          for f in app/src/main/assets/web/*.js; do node --check "$f" || exit 1; done
+
+  build:
+    name: Build APK
+    needs: web-check
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3   # SDK + accepts licences
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9                       # no wrapper jar in the repo, so Gradle is installed here
+
+      - name: Build debug APK
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Decode release keystore (only if secrets are set)
+        if: env.HAS_KEYSTORE == 'true'
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+
+      - name: Build signed release APK (only if secrets are set)
+        if: env.HAS_KEYSTORE == 'true'
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Collect APKs
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/*.apk dist/JdxiRemote-debug.apk
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then cp app/build/outputs/apk/release/app-release.apk dist/JdxiRemote-release.apk; fi
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JdxiRemote-apk
+          path: dist/*.apk
+
+      - name: Attach to GitHub Release (tags like v1.0)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.apk
