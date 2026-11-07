@@ -30,7 +30,7 @@ Explore and edit the JD-Xi's sound engine through a visual interface.
 
 The editor provides both simplified controls for quick adjustments and advanced editing for detailed sound design.
 
-### 🎛️ Mixer & Effects
+###  Mixer & Effects
 
 Control your JD-Xi's mix and effects without navigating through hardware menus.
 
@@ -42,7 +42,7 @@ Control your JD-Xi's mix and effects without navigating through hardware menus.
 
 Designed for quick adjustments during sound design, rehearsals and live performance.
 
-### 🎵 Native 4-Track Step Sequencer
+### Native 4-Track Step Sequencer
 
 JD-Xi Remote includes a native Android step sequencer, built with Kotlin and Jetpack Compose.
 
@@ -72,7 +72,7 @@ The sequencer follows the JD-Xi's four-part architecture:
 
 Create musical ideas on your phone or tablet and hear them immediately through the connected synthesizer.
 
-### 🚀 Live Performance & Pattern Launcher
+### Live Performance & Pattern Launcher
 
 The Performance section is designed for playing and arranging JD-Xi patterns live.
 
@@ -91,7 +91,7 @@ Features include:
 
 This makes it possible to create longer musical arrangements from existing JD-Xi patterns and move between sections during a live performance.
 
-### 🎼 Patch Management
+### Patch Management
 
 Manage your own sounds directly from the app.
 
@@ -124,7 +124,7 @@ The feature provides an interesting starting point for creating new sounds inspi
 
 A dedicated MIDI Player section provides additional ways to work with MIDI material and the connected synthesizer.
 
-### 🌈 Audio Visualizer
+### Audio Visualizer
 
 The Remote interface includes a visualizer for displaying animated audio-related graphics.
 
@@ -136,7 +136,7 @@ The Remote interface includes a visualizer for displaying animated audio-related
 
 Audio-based visualization depends on the availability of a compatible audio input and Android permissions.
 
-### 🎨 Customizable Interface
+### Customizable Interface
 
 JD-Xi Remote offers several visual themes:
 
