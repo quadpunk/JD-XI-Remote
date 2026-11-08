@@ -3,7 +3,7 @@
 # https://jdxi-remote.wasmer.app/
 
 # JD-Xi Remote for Android
-Download is under releases
+Download is under [releases](https://github.com/quadpunk/JD-XI-Remote/releases)
 
 **A powerful MIDI controller, sound editor, performance tool and step sequencer for the Roland JD-Xi synthesizer.**
 
