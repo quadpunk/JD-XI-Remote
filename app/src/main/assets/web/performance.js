@@ -1,6 +1,7 @@
 (()=>{
-/* Performance: six own patterns (JD-Xi programs). The next pattern is queued and only switched in at the
-   end of the current one, so playback is never cut off.
+/* Performance: six own patterns (JD-Xi programs). Patterns can be queued (several in a row, each with its own
+   number of bars); the next one is only switched in at the end of the current one, so playback is never cut off.
+   The last pattern in the queue keeps looping.
    Clock modes:
    - app:    this page sends MIDI Start + Clock (JD-Xi Sync Mode = SLAVE). Needed for Start to do anything:
              a slave JD-Xi waits for clock ticks, and a master JD-Xi ignores external Start.
@@ -29,7 +30,7 @@ const LSBS=[64,65,0,1];
 let lastProgSentAt=-1e9,lastLsb=null;
 function progMsgs(code,ch){
  const b=code.charCodeAt(0)-65,num=+code.slice(1),lsb=[64,64,65,65,0,0,1,1][b],pc=(num-1)+(b%2?64:0);
- lastProgSentAt=performance.now();lastLsb=lsb;
+ lastProgSentAt=performance.now();progEpoch++;lastLsb=lsb;
  return [[0xb0|ch,0,85],[0xb0|ch,32,lsb],[0xc0|ch,pc]];
 }
 const chan=()=>+$('perfchan').value-1;
@@ -40,10 +41,20 @@ function launchNow(code){
 }
 
 /* ---- state ---- */
-const S={running:false,ext:null,cur:null,next:null,sent:null,k:0,patStart:0,patStartT:0,nextT:0,tickMs:20.8,timer:null,lastTickAt:0};
+const S={running:false,ext:null,cur:null,curBars:null,last:null,sent:null,k:0,patStart:0,patStartT:0,nextT:0,tickMs:20.8,timer:null,lastTickAt:0};
+/* queue of patterns that follow the current one: [{i: slot index, bars: how long it plays before the next one}] */
+const queue=[];
+const nextIdx=()=>queue.length?queue[0].i:null;
+const curBars=()=>S.curBars||bars(S.cur);
+let progEpoch=0;                       /* changes whenever the JD-Xi switches program (punch-in FX use it) */
+window.JDXiPerfEpoch=()=>progEpoch;
 let clockUntil=0;
 window.JDXiClockReadyAt=()=>clockUntil;
 const mode=()=>$('perfmode').value;
+/* Start watchdog: after START / ▶ Play from this app, the JD-Xi must send some MIDI (notes, CC...) within 1 s,
+   otherwise it is probably in Master sync mode (or not listening) and we stop instead of pretending to play. */
+let watchUntil=0;
+const WATCH_MS=1000;
 
 // Arm only after several separate note attacks from the JD-Xi parts during this run.
 let idleHits=0,idleHitAt=-Infinity,ignoreIdleUntil=0;
@@ -70,19 +81,21 @@ function trackActivity(m,st,ch){
 }
 
 function transition(k,t){
- if(S.sent!==null){resetActivity();S.cur=S.sent;if(S.next===S.sent)S.next=null;S.sent=null;
+ if(S.sent!==null){resetActivity();const e=queue[0]&&queue[0].i===S.sent?queue.shift():null;S.cur=S.sent;S.curBars=e?e.bars:bars(S.sent);S.last=S.cur;S.sent=null;
   if($('perfrestart').checked){if(mode()==='app')sendTransport(0xfa,t);}}
  S.ext=null;S.patStart=k;S.patStartT=t;
+ render();
 }
 
 /* ---- app clock: scheduled with Web MIDI timestamps, so timing does not depend on JS timers ---- */
-function appStart(idx){
+function appStart(idx,nb){
  const a=api();if(!a?.connected()){status('Connect MIDI first');return}
  stopEngine(false);
- S.cur=idx;S.ext=null;S.next=null;S.sent=null;
+ S.cur=idx;S.curBars=nb||bars(idx);S.last=idx;S.ext=null;S.sent=null;
  if(!launchNow(slots[idx].code))return;
  const t0=performance.now()+250;
  S.k=0;S.patStart=0;S.patStartT=t0;S.nextT=t0;S.running=true;
+ watchUntil=$('perfidle').checked?t0+WATCH_MS:0;
  sendTransport(0xfa,t0);
  S.timer=setInterval(appPump,20);
  status('Playing from this app’s clock · '+clamp(+$('perfbpm').value,40,240,120)+' BPM');
@@ -92,6 +105,10 @@ function appPump(){
  const a=api();
  if(!a?.connected()){stopEngine(false);status('MIDI disconnected');render();return}
  const bpm=clamp(+$('perfbpm').value,40,240,120),tickMs=60000/bpm/24;S.tickMs=tickMs;
+ if(watchUntil&&performance.now()>=watchUntil){
+  watchUntil=0;stopEngine(true);render();
+  status('Stopped: no MIDI came back from the JD-Xi within 1 s. Is it in Master sync mode or not listening? (Set Sync to SLAVE.)');return;
+ }
  if(attacks>=3&&performance.now()-lastMusicAt>=Math.max(1000,48*tickMs)){
   stopEngine(true);render();status('Stopped after the incoming pattern went quiet (no MIDI Stop received).');return;
  }
@@ -99,16 +116,16 @@ function appPump(){
  const now=performance.now();
  if(S.nextT<now){S.patStartT+=now-S.nextT;S.nextT=now}
  while(S.nextT<now+70){
-  const k=S.k,t=S.nextT,boundary=S.patStart+bars(S.cur)*96;
+  const k=S.k,t=S.nextT,boundary=S.patStart+curBars()*96;
   const leadMs=clamp(+$('perflead').value,0,500,30),leadTicks=Math.max(1,Math.round(leadMs/tickMs));
   a.sendAt([0xf8],t);
-  if(S.sent===null&&S.next!==null&&k>=boundary-leadTicks-4&&k<boundary-1){
+  if(S.sent===null&&nextIdx()!==null&&k>=boundary-leadTicks-4&&k<boundary-1){
    /* the program change lands `leadMs` before the downbeat of the next pattern */
    const target=Math.max(t+(boundary-k)*tickMs-leadMs,performance.now()+30);
-   const m=progMsgs(slots[S.next].code,chan());
+   const m=progMsgs(slots[nextIdx()].code,chan());
    a.sendAt(m[0],target-24);a.sendAt(m[1],target-12);a.sendAt(m[2],target);
    window.JDXiMixer?.afterProgramChange(Math.max(0,target-performance.now())+450);
-   S.sent=S.next;
+   S.sent=nextIdx();render();
   }
   if(k===boundary)transition(k,t);
   S.nextT+=tickMs;clockUntil=S.nextT;S.k++;
@@ -125,6 +142,7 @@ function idleClock(){
 }
 setInterval(idleClock,20);
 function panelStart(now){
+ watchUntil=0;
  S.running=true;S.k=0;S.patStart=0;S.patStartT=now;S.nextT=Math.max(now,clockUntil);
  S.timer=setInterval(appPump,20);appPump();render();
 }
@@ -137,16 +155,19 @@ function sendTransport(byte,t){
  return sent;
 }
 function remoteStop(){
+ watchUntil=0;
  ignoreIdleUntil=performance.now()+300;
  resetActivity();
  // A timestamped Start already queued at the MIDI output can still fire after a panel Stop.
  if(mode()==='app'&&lastStartAt>performance.now())sendTransport(0xfc,lastStartAt);
  clearInterval(S.timer);S.timer=null;
- S.running=false;S.sent=null;S.next=null;
+ S.running=false;S.sent=null;
  try{window.JDXiViz?.transport(false)}catch{}
  status(mode()==='app'?'Stopped on the JD-Xi.':'JD-Xi clock: stopped');render();
 }
+let inClockAt=0,inTickMs=0;
 function realtime(b){
+ if(b===0xf8){const t=performance.now();if(inClockAt){const d=t-inClockAt;if(d>0&&d<250)inTickMs=inTickMs?inTickMs*.9+d*.1:d}inClockAt=t}
  if(window.JDXiSteps?.playing())return;
  const now=performance.now();
  if(b===0xfc){if(S.running)remoteStop();return}
@@ -163,8 +184,8 @@ function realtime(b){
   S.lastTickAt=now;
   if(mode()!=='follow'||!S.running)return;
   S.k++;
-  const boundary=S.patStart+bars(S.cur)*96,leadTicks=Math.max(1,Math.round((clamp(+$('perflead').value,0,500,30)+24)/S.tickMs));
-  if(S.sent===null&&S.next!==null&&S.k>=boundary-leadTicks&&S.k<boundary){if(launchNow(slots[S.next].code))S.sent=S.next}
+  const boundary=S.patStart+curBars()*96,leadTicks=Math.max(1,Math.round((clamp(+$('perflead').value,0,500,30)+24)/S.tickMs));
+  if(S.sent===null&&nextIdx()!==null&&S.k>=boundary-leadTicks&&S.k<boundary){if(launchNow(slots[nextIdx()].code)){S.sent=nextIdx();render()}}
   if(S.k>=boundary)transition(boundary,now);
  }else if(b===0xfa&&mode()==='follow'){S.running=true;S.lastTickAt=now;S.k=0;S.patStart=0;S.patStartT=now;S.sent=null;render()}
  else if(b===0xfb&&mode()==='follow'){S.running=true;S.lastTickAt=now;render()}
@@ -175,12 +196,13 @@ const inBank={};
 function codeFrom(lsb,pc){const i=LSBS.indexOf(lsb);if(i<0||pc<0||pc>127)return null;return String.fromCharCode(65+i*2+(pc>=64?1:0))+String((pc%64)+1).padStart(2,'0')}
 function remoteProgram(code){
  const now=performance.now();
- if(now-lastProgSentAt<500)return;                       /* echo of our own program change */
+ if(now-lastProgSentAt<500)return;
+ progEpoch++;                       /* echo of our own program change */
  const idx=slots.findIndex(x=>x.code===code);
  if(idx>=0&&(idx===S.cur||idx===S.sent))return;          /* already what we think is playing / just sent */
  if(idx<0&&S.ext===code&&S.cur==null)return;
- if(idx>=0){S.cur=idx;S.ext=null;if(S.next===idx)S.next=null}
- else{S.cur=null;S.ext=code}
+ if(idx>=0){S.cur=idx;S.curBars=bars(idx);S.last=idx;S.ext=null;if(S.sent===null&&nextIdx()===idx)queue.shift()}
+ else{S.cur=null;S.curBars=null;S.ext=code}
  S.sent=null;
  if(S.running){S.patStart=S.k;S.patStartT=mode()==='app'?Math.max(now,S.nextT-S.tickMs*2):now}   /* pattern restarts: count its bars from here */
  status('JD-Xi switched to '+code+(idx>=0?' · Pattern '+(idx+1):' (not one of the six slots)'));
@@ -191,6 +213,7 @@ window.JDXiPerformanceReceive=m=>{
  if(!m||!m.length)return;
  if(m.length===1){realtime(m[0]);return}
  const st=m[0]&0xf0,ch=m[0]&15;
+ if(watchUntil&&m[0]>=0x80&&m[0]<0xf0)watchUntil=0;   /* the JD-Xi is answering: it is listening */
  trackActivity(m,st,ch);
  if(st===0xb0){const b=inBank[ch]||(inBank[ch]={});if(m[1]===0)b.msb=m[2];else if(m[1]===32){b.lsb=m[2];lastLsb=m[2]}}
  else if(st===0xc0){
@@ -202,13 +225,14 @@ window.JDXiPerformanceReceive=m=>{
 };
 
 function stopEngine(sendStop){
+ watchUntil=0;
  ignoreIdleUntil=performance.now()+300;
  resetActivity();
  clearInterval(S.timer);S.timer=null;
  /* clock ticks are queued up to ~120 ms ahead and cannot be recalled, so Stop goes out after the last queued tick */
  if(sendStop&&S.running){sendTransport(0xfc,mode()==='app'?Math.max(performance.now(),S.nextT):0)}
  const was=S.running;
- S.running=false;S.sent=null;S.next=null;
+ S.running=false;S.sent=null;
  if(was){try{window.JDXiViz?.transport(false)}catch{}}
 }
 
@@ -221,49 +245,115 @@ slots.forEach((slot,i)=>{
  const badge=document.createElement('span');badge.className='perf-badge';
  const code=document.createElement('input');code.value=slot.code;code.maxLength=3;code.setAttribute('aria-label','Program A01–H64, pattern '+(i+1));
  code.onchange=()=>{const v=code.value.trim().toUpperCase();if(!valid(v)){code.value=slot.code;status('Use A01–H64');return}slot.code=v;code.value=v;saveSlots();render()};
- const barsLabel=document.createElement('label');barsLabel.textContent='Length (bars)';
+ const barsLabel=document.createElement('label');barsLabel.textContent='Bars';
  const bi=document.createElement('input');bi.type='number';bi.min=1;bi.max=16;bi.value=slot.bars;
  bi.onchange=()=>{slot.bars=clamp(Math.round(+bi.value),1,16,4);bi.value=slot.bars;saveSlots()};
  barsLabel.append(bi);
- const btn=document.createElement('button');btn.type='button';btn.className='perf-go';btn.onclick=()=>tap(i);
+ const mk=(txt,cls,title,fn)=>{const b=document.createElement('button');b.type='button';b.className='perf-mini '+cls;b.textContent=txt;b.title=title;b.setAttribute('aria-label',title);b.onclick=fn;return b};
+ const btns=document.createElement('div');btns.className='perf-btns';
+ const bPlay=mk('▶ Play','perf-go','Play this pattern now',()=>playNow(i));
+ const bLoop=mk('⟲ Loop','perf-loop','Loop this pattern: it plays after the current one and keeps repeating',()=>loopIt(i));
+ const bQ=mk('+ Queue','perf-q','Add this pattern to the end of the queue',()=>enqueue(i));
+ btns.append(bPlay,bLoop,bQ);
  const top=document.createElement('div');top.className='perf-top';top.append(head,badge);
- card.append(top,code,barsLabel,btn);perfSlots.append(card);
- cards.push({card,badge,btn,code});
+ const row=document.createElement('div');row.className='perf-row';row.append(code,barsLabel);
+ card.append(top,row,btns);perfSlots.append(card);
+ cards.push({card,badge,code});
 });
 
-function tap(i){
- if(window.JDXiTransfer?.busy()){status("Finish the pattern transfer first.");return}
- if(window.JDXiSteps?.playing()){status("Stop the step sequencer first.");return}
- if(!S.running){
-  if(mode()==='app')appStart(i);
-  else if(launchNow(slots[i].code)){S.cur=i;S.next=null;status('Loaded '+slots[i].code+'. Press play on the JD-Xi; the page follows its clock.');render()}
-  return;
+function guard(){
+ if(window.JDXiTransfer?.busy()){status('Finish the pattern transfer first.');return false}
+ if(window.JDXiSteps?.playing()){status('Stop the step sequencer first.');return false}
+ return true;
+}
+/* Play: start this pattern right now (restarts the JD-Xi sequencer on the app clock). The queue is kept. */
+function playNow(i){
+ if(!guard())return;
+ if(mode()==='app'){appStart(i);return}
+ if(launchNow(slots[i].code)){
+  S.cur=i;S.curBars=bars(i);S.last=i;S.sent=null;
+  if(S.running){S.patStart=S.k;S.patStartT=performance.now()}
+  status('Loaded '+slots[i].code+'. Press play on the JD-Xi; the page follows its clock.');render();
  }
- if(i===S.cur){S.next=null;render();return}
- if(i===S.sent){status('Already sent: this pattern plays next.');return}
- S.next=S.next===i?null:i;render();
+}
+/* Queue: add to the end of the list; each entry plays its bars, then the next one is triggered. */
+function enqueue(i){
+ if(!guard())return;
+ if(queue.length>=16){status('The queue is full (16).');return}
+ queue.push({i,bars:bars(i)});
+ status(S.running?'Pattern '+(i+1)+' queued as #'+queue.length+'.':'Pattern '+(i+1)+' queued. Press START (the queue is played from the top).');
+ render();
+}
+/* Loop: after the current pattern (and anything already sent) this one plays and keeps looping. */
+function loopIt(i){
+ if(!guard())return;
+ if(!S.running){playNow(i);return}
+ const keep=S.sent!==null?1:0;
+ queue.length=Math.min(queue.length,keep);
+ if(keep&&queue[0].i===i){status('Pattern '+(i+1)+' is already next and will loop.')}
+ else if(!keep&&i===S.cur){status('Pattern '+(i+1)+' loops.')}
+ else{queue.push({i,bars:bars(i)});status('Pattern '+(i+1)+' loops after the current pattern.')}
+ render();
+}
+function dequeue(n){
+ if(n===0&&S.sent!==null){status('Already sent to the JD-Xi: this pattern plays next.');return}
+ queue.splice(n,1);render();
 }
 
+const qList=$('perfqueue');
+let qKey=null;
+function renderQueue(){
+ const key=queue.map(e=>e.i+':'+e.bars).join(',')+'|'+(S.sent!==null);
+ if(key===qKey)return;
+ qKey=key;
+ qList.replaceChildren();
+ queue.forEach((e,n)=>{
+  const li=document.createElement('li');li.className='perf-qitem'+(n===0?' first':'');
+  const num=document.createElement('span');num.className='pq-n';num.textContent=n+1;
+  const name=document.createElement('span');name.className='pq-name';
+  const sentNow=n===0&&S.sent!==null;
+  name.textContent='Pattern '+(e.i+1)+' · '+slots[e.i].code+(sentNow?' · sent':'');
+  const bl=document.createElement('label');bl.className='pq-bars';
+  const bi=document.createElement('input');bi.type='number';bi.min=1;bi.max=16;bi.value=e.bars;bi.setAttribute('aria-label','Bars for queue entry '+(n+1));
+  bi.onchange=()=>{e.bars=clamp(Math.round(+bi.value),1,16,4);bi.value=e.bars};
+  bl.append(bi,' bars');
+  const x=document.createElement('button');x.type='button';x.className='perf-mini pq-x';x.textContent='✕';x.title='Remove from queue';x.setAttribute('aria-label','Remove from queue');
+  x.disabled=sentNow;x.onclick=()=>dequeue(n);
+  li.append(num,name,bl,x);qList.append(li);
+ });
+ $('perfqempty').hidden=queue.length>0;
+ $('perfqclear').hidden=queue.length===0;
+ $('perfqloop').hidden=queue.length===0;
+ if(queue.length)$('perfqloop').textContent='Then Pattern '+(queue[queue.length-1].i+1)+' keeps looping.';
+}
+$('perfqclear').onclick=()=>{queue.length=S.sent!==null?Math.min(1,queue.length):0;render();status('Queue cleared.')};
+
 function render(){
+ const nIdx=nextIdx();
  cards.forEach((c,i)=>{
-  const isCur=S.cur===i&&S.running,isNext=S.next===i||S.sent===i&&S.cur!==i;
+  const isCur=S.cur===i&&S.running,isNext=nIdx===i||S.sent===i&&S.cur!==i;
+  const pos=[];queue.forEach((e,n)=>{if(e.i===i)pos.push(n+1)});
   c.card.classList.toggle('current',isCur);c.card.classList.toggle('next',!!isNext&&!isCur);
-  c.badge.textContent=isCur?'NOW':isNext?'NEXT':'';
-  c.btn.textContent=!S.running?(mode()==='app'?'▶ Play':'Load'):isCur?'Playing (loops)':isNext?'Next · tap to cancel':'Play next';
+  c.badge.textContent=isCur?'NOW':pos.length?'Q'+pos.join(' Q'):'';
  });
  const f=i=>i==null?(S.ext?S.ext+' · from JD-Xi':'—'):slots[i].code+' · Pattern '+(i+1);
  $('perfnowtxt').textContent=S.running?f(S.cur):'Stopped';
- $('perfnexttxt').textContent=S.next!=null?f(S.next):(S.running?'— (current loops)':'—');
- $('perfstop').disabled=mode()==='follow';
+ $('perfnexttxt').textContent=nIdx!=null?f(nIdx)+' · '+queue[0].bars+' bars'+(queue.length>1?' (+'+(queue.length-1)+' more)':''):(S.running?'— (current loops)':(S.last!=null?f(S.last)+' (START)':'—'));
+ const follow=mode()==='follow';
+ $('perfstart').disabled=follow||S.running;
+ $('perfstop').disabled=follow;
+ $('perftransport').classList.toggle('running',S.running);
+ $('perftransporthint').textContent=follow?'Follow mode: start and stop on the JD-Xi itself.':(S.running?'Playing':'Stopped');
  $('perfstandbywrap').hidden=mode()!=='app';
  $('perfidlewrap').hidden=mode()!=='app';
  $('perfbpmwrap').hidden=mode()!=='app';
+ renderQueue();
 }
 function tickUi(){
  if(mode()==='follow'&&S.running&&performance.now()-S.lastTickAt>700)remoteStop();
  let pos=0;
  if(S.running){pos=mode()==='app'?Math.max(0,(performance.now()-S.patStartT)/S.tickMs/96):Math.max(0,(S.k-S.patStart)/96)}
- const n=bars(S.cur);
+ const n=curBars();
  $('perfbarfill').style.width=(S.running?Math.min(100,pos/n*100):0)+'%';
  if(S.running){
   const bar=Math.min(n,Math.floor(pos)+1),beat=Math.floor((pos%1)*4)+1;
@@ -288,20 +378,49 @@ $('perfidle').onchange=()=>{resetActivity();ls.set('jdxi-perf-idle-stop',$('perf
 $('perfstandby').checked=ls.get('jdxi-perf-standby','true')==='true';
 $('perfstandby').onchange=()=>{resetActivity();ls.set('jdxi-perf-standby',$('perfstandby').checked)};
 const HELP={
- app:'Set the JD-Xi to Sync Mode = SLAVE (it then waits for clock). Keep clock while stopped lets you try Play on the synth while the app is idle. Tapping a pattern selects its program, starts the JD-Xi sequencer and sends clock at the tempo above. Select the matching ClockSource (USB or MIDI) on the synth. Select its MIDI input in this app to receive panel Start/Stop. Look for IN FA / IN FC in the MIDI log. When silence detection is on, repeated incoming notes arm a fallback: two beats of inactivity (at least one second) stop playback. Turn it off for patterns with long rests or sustained notes.',
- follow:'Keep the JD-Xi on Sync Mode = MASTER. Tap a pattern to load it, start and stop playback on the JD-Xi itself; this page counts the JD-Xi’s clock to find the end of each pattern. Needs the JD-Xi’s MIDI input port selected.'
+ app:'Set the JD-Xi to Sync Mode = SLAVE (it then waits for clock). Keep clock while stopped lets you try Play on the synth while the app is idle. START (or ▶ Play on a pattern) selects the program, starts the JD-Xi sequencer and sends clock at the tempo above; STOP stops it. + Queue lines patterns up: each plays its bars, then the next is triggered, and the last one keeps looping. Select the matching ClockSource (USB or MIDI) on the synth. Select its MIDI input in this app to receive panel Start/Stop. Look for IN FA / IN FC in the MIDI log. When silence detection is on, repeated incoming notes arm a fallback: two beats of inactivity (at least one second) stop playback. Turn it off for patterns with long rests or sustained notes.',
+ follow:'Keep the JD-Xi on Sync Mode = MASTER. Press ▶ Play on a pattern to load it, start and stop playback on the JD-Xi itself; this page counts the JD-Xi’s clock to find the end of each pattern. Needs the JD-Xi’s MIDI input port selected.'
 };
 const applyMode=()=>{$('perfhelp').textContent=HELP[mode()];render()};
-$('perfmode').onchange=()=>{stopEngine(false);S.cur=null;ls.set('jdxi-perf-mode',mode());applyMode();status(mode()==='app'?'Tap a pattern to start.':'Tap a pattern to load it.')};
+/* Sync readout: the JD-Xi's Sync Mode is not readable/writable over SysEx (see SYSTEM_MIDI_MATRIX.md), so it is read from
+   the MIDI clock the synth sends: clock arriving = JD-Xi is MASTER; none = SLAVE (or a stopped master). */
+const syncVal=$('perfsyncval');
+function syncReadout(){
+ const live=inClockAt&&performance.now()-inClockAt<700,input=api()?.hasInput?.();
+ let txt,cls='';
+ if(live){const bpm=inTickMs?Math.round(60000/(inTickMs*24)):0;txt='MASTER'+(bpm?' · '+bpm+' BPM':'');cls=mode()==='app'?'warn':'on';if(mode()==='app')txt+=' ⚠ set JD-Xi to SLAVE'}
+ else if(!input){txt='— (no MIDI input)'}
+ else{txt='SLAVE / no clock'}
+ if(syncVal.textContent!==txt)syncVal.textContent=txt;
+ syncVal.className='perf-syncval'+(cls?' '+cls:'');
+}
+setInterval(syncReadout,400);syncReadout();
+$('perfsyncbtn').onclick=()=>{
+ $('perfmode').value=mode()==='app'?'follow':'app';
+ $('perfmode').onchange();
+ status(mode()==='app'?'Clock: this app sends clock. Set the JD-Xi Sync Mode to SLAVE on the synth.':'Clock: following the JD-Xi. Set the JD-Xi Sync Mode to MASTER on the synth.');
+};
+$('perfmode').onchange=()=>{stopEngine(false);S.cur=null;ls.set('jdxi-perf-mode',mode());applyMode();status(mode()==='app'?'Press START or ▶ Play on a pattern.':'Press ▶ Play on a pattern to load it.')};
+$('perfstart').onclick=()=>{
+ if(!guard())return;
+ if(mode()!=='app'){status('Follow mode: press play on the JD-Xi itself.');return}
+ if(S.running)return;
+ let idx=S.last!=null?S.last:0,nb=null;
+ if(queue.length){const e=queue.shift();idx=e.i;nb=e.bars}
+ appStart(idx,nb);
+};
 $('perfstop').onclick=()=>{
- stopEngine(true);S.cur=null;S.ext=null;
+ const was=S.running;
+ stopEngine(true);
+ if(!was&&mode()==='app')sendTransport(0xfc,0);   /* always tell the JD-Xi to stop, even if the page thought it was idle */
+ S.cur=null;S.ext=null;
  render();status('Stopped.')};
 $('perfpanic').onclick=()=>{const a=api();if(!a?.connected()){status('Connect MIDI first');return}
  for(let ch=0;ch<16;ch++){a.send([0xb0|ch,120,0]);a.send([0xb0|ch,123,0])}status('All notes off sent')};
 applyMode();
 /* read-only view of the engine for the visualizer */
 window.JDXiPerfState=()=>{
- const n=bars(S.cur),pos=S.running?(mode()==='app'?Math.max(0,(performance.now()-S.patStartT)/S.tickMs/96):Math.max(0,(S.k-S.patStart)/96)):0;
+ const n=curBars(),pos=S.running?(mode()==='app'?Math.max(0,(performance.now()-S.patStartT)/S.tickMs/96):Math.max(0,(S.k-S.patStart)/96)):0;
  return {running:S.running,bpm:mode()==='app'?clamp(+$('perfbpm').value,40,240,120):60000/S.tickMs/24,frac:Math.min(1,pos/n),bar:Math.min(n,Math.floor(pos)+1),bars:n,cur:S.cur,code:S.cur==null?(S.ext||''):slots[S.cur].code};
 };
 })();

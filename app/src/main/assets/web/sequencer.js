@@ -172,7 +172,14 @@ function grid(){
  table.onpointercancel=table.onlostpointercapture=finish;
  for(let row=0;row<rows;row++){
   const key=base+(drum()?row:rows-1-row),name=drum()?(pads[row]||pitch(key)):pitch(key);
-  const tr=body.insertRow();heading(tr,name);
+  const tr=body.insertRow(),keyCell=heading(tr,name);
+  if(!drum()){
+   /* vertical piano keyboard: one key per row; tap a key to hear the note */
+   const black=[1,3,6,8,10].includes(key%12);
+   keyCell.className='sq-key '+(black?'sq-black':'sq-white')+(key%12===0?' sq-c':'');
+   keyCell.title=name;
+   keyCell.onpointerdown=e=>{e.preventDefault();preview(key,number('vel',1,127,100))};
+  }
   for(let i=0;i<16;i++){
    const step=bar*16+i,b=document.createElement('button');
    b.dataset.step=step;b.dataset.key=key;

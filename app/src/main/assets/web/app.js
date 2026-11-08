@@ -105,7 +105,7 @@ function onMidiMessage(data,time){
  for(const fn of [applyEditorReply,m=>window.JDXiPerformanceReceive?.(m)]){try{fn(data)}catch(err){log('Handler error: '+err.message)}}
  if(data[0]===0xf0&&data[1]===0x41){clearTimeout(replyTimer);replyTimer=null;setDiag('JD-Xi SysEx reply received on "'+(input?.name||'input')+'": two-way communication works.')}
 }
-function autoRead(){if(output&&input&&sysexAllowed){try{$('readblock').click();setTimeout(()=>{try{$('arpread').click()}catch(e){log(e.message)}},150)}catch(e){log(e.message)}}}
+function autoRead(){if(output&&input&&sysexAllowed){try{$('readblock').click();setTimeout(()=>{try{$('arpread').click()}catch(e){log(e.message)}},150);setTimeout(()=>{try{$('arp-read-parts').click()}catch(e){log(e.message)}},450)}catch(e){log(e.message)}}}
 
 /* ---------- buttons ---------- */
 $('midi-refresh').onclick=async()=>{try{await getMidiAccess()}catch(e){midiDiagnostics(e.message,true)}};
@@ -223,7 +223,113 @@ $('midfile').onchange=async e=>{stopMidiFile();try{const f=e.target.files[0];if(
 $('midplay').onclick=()=>{if(window.JDXiTransfer?.busy()){ $('midstatus').textContent='Finish the pattern transfer first.';return}stopMidiFile();if(!output||!midiEvents.length){$('midstatus').textContent='Connect MIDI and load a valid file first';return}midiPlaying=true;const start=performance.now()+60;for(const e of midiEvents){midiTimers.push(setTimeout(()=>send(e.data),Math.max(0,start-performance.now()+e.ms)))}midiTimers.push(setTimeout(()=>{if(!midiPlaying)return;midiTimers=[];if($('midloop').checked)$('midplay').click();else{$('midstatus').textContent='Playback complete';midiPlaying=false}},midiFileDuration+100));$('midstatus').textContent='Playing'};
 $('midstop').onclick=()=>{stopMidiFile();for(let ch=0;ch<16;ch++)send([0xb0|ch,123,0])};
 
+// Initialize MIDI readback before any ARP button renders at startup.
+const editorReadback=new Map();
 const editorBases={digital1:0x19010000,digital2:0x19210000,analog:0x19420000,arp:0x18004000};
+
+/* Arpeggio on/off: the JD-Xi gives no reply to a DT1 write, and some firmware states ignore the switch until the
+   ARP button has been used once on the panel. So after every toggle we read the block back, show what the synth
+   really did, and retry once with the whole 12-byte block if the switch did not change. */
+let arpToken=0;
+function arpStatus(t){const el=$('arpstatus');if(el)el.textContent=t}
+const ARP_ZONES=[0x18003000,0x18003100,0x18003200,0x18003300],ARP_ZN=['D1','D2','Analog','Drums'];
+/* Per-part ARP switches, independent of the global Program Controller ARP switch.
+   Only DT1 readback from the JD-Xi is shown as confirmed status. */
+const arpZonePending=new Map();
+function arpZoneStatus(){
+ return ARP_ZONES.map((a,i)=>ARP_ZN[i]+' '+(editorReadback.get(a+3)===undefined?'?':editorReadback.get(a+3)===1?'on':'off')).join(', ');
+}
+function arpZoneButtons(){
+ ARP_ZONES.forEach((a,i)=>{
+  const btn=$('arp-part-'+i),value=editorReadback.get(a+3),pending=arpZonePending.get(i);
+  if(!btn)return;
+  const actual=value===undefined?'unknown':value===1?'ON':'OFF';
+  btn.textContent=ARP_ZN[i]+' · ARP '+(value===1?'ON':value===0?'OFF':'?')+(pending!==undefined?' (verifying…)':'');
+  btn.setAttribute('aria-pressed',value===1?'true':'false');
+  btn.title='JD-Xi status: '+actual+'. Click to request '+(value===1?'OFF':'ON')+' for '+ARP_ZN[i]+'.';
+  btn.classList.toggle('arp-part-active',value===1);
+  btn.classList.toggle('arp-part-pending',pending!==undefined);
+ });
+}
+function arpZoneRead(indices=[0,1,2,3]){
+ for(const i of indices)editorReadback.delete(ARP_ZONES[i]+3);
+ arpZoneButtons();
+ indices.forEach((i,n)=>setTimeout(()=>{
+  try{sendEditor(17,ARP_ZONES[i],[0,0,0,0x23])}catch(e){log(e.message)}
+ },n*90));
+}
+function arpZoneSet(i){
+ const addr=ARP_ZONES[i]+3,old=editorReadback.get(addr),wanted=old===1?0:1;
+ // Do not set a local optimistic ON/OFF: the actual state must come from JD-Xi.
+ if(arpZonePending.has(i))return;
+ if(!output){arpStatus('Connect MIDI before changing ARP.');return}
+ let ok=false;
+ try{ok=sendEditor(18,addr,[wanted])}catch(e){log(e.message)}
+ if(!ok){arpStatus('Could not send ARP command for '+ARP_ZN[i]);return}
+ arpZonePending.set(i,wanted);
+ arpZoneButtons();
+ arpStatus(ARP_ZN[i]+' ARP '+(wanted?'ON':'OFF')+' requested; checking JD-Xi…');
+ setTimeout(()=>{
+  if(arpZonePending.get(i)!==wanted)return;
+  arpZoneRead([i]);
+  setTimeout(()=>{
+   if(arpZonePending.get(i)!==wanted)return;
+   arpZonePending.delete(i);
+   const received=editorReadback.get(addr);
+   arpZoneButtons();
+   if(received===wanted)arpStatus(ARP_ZN[i]+' ARP '+(wanted?'ON':'OFF')+' confirmed by JD-Xi. Parts: '+arpZoneStatus());
+   else if(received===undefined)arpStatus('No readback from JD-Xi for '+ARP_ZN[i]+'; switch not verified.');
+   else arpStatus('JD-Xi did not accept '+ARP_ZN[i]+' ARP '+(wanted?'ON':'OFF')+'. Parts: '+arpZoneStatus());
+  },550);
+ },130);
+}
+ARP_ZONES.forEach((_,i)=>{$('arp-part-'+i).onclick=()=>arpZoneSet(i)});
+$('arp-read-parts').onclick=()=>{
+ const token=++arpToken;
+ arpStatus('Reading part ARP switches from JD-Xi…');
+ arpZoneRead();
+ setTimeout(()=>{if(token===arpToken)arpStatus('Parts: '+arpZoneStatus()+' (JD-Xi readback)');},750);
+};
+arpZoneButtons();
+function arpZoneReport(v,token){
+ const rb=editorReadback;
+ ARP_ZONES.forEach(a=>rb.delete(a+3));
+ ARP_ZONES.forEach((a,i)=>setTimeout(()=>{try{sendEditor(17,a,[0,0,0,0x23])}catch(e){log(e.message)}},i*80));
+ setTimeout(()=>{
+  if(token!==arpToken)return;
+  const z=ARP_ZONES.map((a,i)=>ARP_ZN[i]+' '+(rb.get(a+3)===undefined?'?':rb.get(a+3)?'on':'off')).join(', ');
+  const anyOn=ARP_ZONES.some(a=>rb.get(a+3)===1);
+  arpStatus('Controller switch '+(v?'on':'off')+' (readback confirmed). Parts: '+z+(v&&!anyOn?' — no part has ARP on, so nothing will arpeggiate: switch a part on above.':''));
+ },ARP_ZONES.length*80+320);
+}
+function arpVerify(addr,v,asBlock){
+ const token=++arpToken,base=editorBases.arp;
+ /* The arpeggio only runs when the controller switch AND the part's own ARP switch are on (Program Zone, offset 03). */
+ if(v===1&&$('arpautod1')&&$('arpautod1').checked&&editorReadback.get(ARP_ZONES[0]+3)!==1){
+  try{sendEditor(18,ARP_ZONES[0]+3,[1])}catch(e){log(e.message)}
+ }
+ const readBlock=()=>{try{sendEditor(17,base,[0,0,0,0x0c])}catch(e){log(e.message)}};
+ const check=attempt=>{
+  if(token!==arpToken)return;
+  editorReadback.delete(addr);readBlock();
+  setTimeout(()=>{
+   if(token!==arpToken)return;
+   const got=editorReadback.get(addr);
+   if(got===v){arpZoneReport(v,token);return}
+   if(got===undefined){arpStatus('No reply from the JD-Xi; could not confirm the arpeggio switch.');return}
+   if(attempt===0){
+    arpStatus('The JD-Xi ignored the switch; retrying…');
+    try{
+     if(asBlock)sendEditor(18,addr,[v]);      /* retry with the single-byte write */
+     else{const blk=[];for(let i=0;i<12;i++)blk.push(editorReadback.get(base+i));if(blk.some(x=>x===undefined)){arpStatus('The JD-Xi ignored the arpeggio switch.');return}blk[3]=v;sendEditor(18,base,blk)}
+    }catch(e){log(e.message)}
+    setTimeout(()=>check(1),120);return;
+   }
+   arpStatus('The JD-Xi did not accept the arpeggio switch over MIDI. Press ARP once on the synth, then try again.');
+  },180);
+ };
+ setTimeout(()=>check(0),110);
+}
 let parameterCatalog={};
 function sendEditor(cmd,addr,payload){const a=[(addr>>>24)&127,(addr>>>16)&127,(addr>>>8)&127,addr&127],id=hex($('deviceid').value,1)[0],checksum=(128-([...a,...payload].reduce((x,y)=>x+y,0)%128))%128;return send([240,65,id,0,0,0,14,cmd,...a,...payload,checksum,247])}
 /* One parameter editor per panel: the Advanced tone editor (Digital 1/2, Analog) and the separate Arpeggio editor.
@@ -266,10 +372,17 @@ function makeEditor(c){
   const push=()=>{
    const v=p.toggle?(ctrl.checked?p.max:p.min):Math.max(p.min,Math.min(p.max,Math.round(+ctrl.value)));
    if(p.toggle)out.textContent=v>p.min?'On':'Off';else{ctrl.value=v;out.textContent=p.options?(p.options[v-p.min]||v):String(v)}
-   if(v===lastValue)return;
+   if(v===lastValue&&!p.toggle)return;
    try{
     const payload=p.bytes===4?[(v>>12)&15,(v>>8)&15,(v>>4)&15,v&15]:[v];
-    if(sendEditor(18,addr,payload)){lastValue=v;editorReadback.set(addr,v)}
+    if(p.toggle&&c.part()==='arp'){
+     /* the JD-Xi panel sends the whole 12-byte Program Controller block when ARP is pressed: do the same */
+     const base=editorBases.arp,blk=[];for(let i=0;i<12;i++)blk.push(editorReadback.get(base+i));
+     const asBlock=blk.every(x=>x!==undefined);
+     /* Global ARP switch does not change per-part ARP settings. */
+     if(asBlock)blk[3]=v;
+     if(asBlock?sendEditor(18,base,blk):sendEditor(18,addr,payload)){lastValue=v;editorReadback.set(addr,v);arpVerify(addr,v,asBlock)}
+    }else if(sendEditor(18,addr,payload)){lastValue=v;editorReadback.set(addr,v)}
    }catch(e){log(e.message)}
   };
   if(ctrl.type==='range'){
@@ -279,7 +392,10 @@ function makeEditor(c){
   card.append(label,controls);c.grid.append(card);
   }
  }
- function read(){const list=params();if(list.length){const length=Math.max(...list.map(p=>p.off))+1;try{sendEditor(17,address(0),[0,0,(length>>7)&127,length&127])}catch(e){log(e.message)}}}
+ /* The JD-Xi only answers RQ1 requests that use the block's exact start address and total size (MIDI Implementation, Data Request 1):
+   Program Controller (arpeggio) 0x0C, tone common / analog 0x40, digital partial 0x3D. A shorter request is silently ignored. */
+ function blockSize(){const part=c.part(),group=c.block.value;if(part==='arp')return 0x0c;if(part==='analog')return 0x40;return group==='commonMain'||group==='commonPlay'?0x40:0x3d}
+ function read(){const list=params();if(list.length){const length=blockSize();try{sendEditor(17,address(0),[0,0,(length>>7)&127,length&127])}catch(e){log(e.message)}}}
  /* a SysEx reply arrived: refresh the visible cards from editorReadback */
  function sync(){
   const list=params();
@@ -301,11 +417,10 @@ $('editpart').onchange=()=>{editors[0].groups();autoRead()};
 loadData('parameters').then(data=>{parameterCatalog=data;editors.forEach(e=>e.groups());autoRead();ovBuild();ovRead(true)}).catch(e=>{log(e.message);$('overview').textContent='Could not build the overview: '+e.message});
 
 // Do not allow editing uninitialized parameters: request a verified JD-Xi DT1 reply first.
-const editorReadback=new Map();
 const replyListeners=[];
 function applyEditorReply(data){if(data.length<15||data[0]!==240||data[1]!==65||data[7]!==18||data[data.length-1]!==247)return;const body=Array.from(data.slice(8,-2)),sum=body.reduce((a,b)=>a+b,0),cs=(128-(sum%128))%128;if(cs!==data[data.length-2])return;const base=(body[0]<<24)|(body[1]<<16)|(body[2]<<8)|body[3];for(let i=4;i<body.length;i++)editorReadback.set(base+i-4,body[i]);
- const waveAddr=base+0x35, rel=waveAddr-base+4;
- if(body.length>=rel+4){const n=((body[rel]<<12)|(body[rel+1]<<8)|(body[rel+2]<<4)|body[rel+3]);editorReadback.set(waveAddr,n)}for(const fn of replyListeners){try{fn(base,body.length-4)}catch{}}ovRefresh();editors.forEach(e=>e.sync())}
+ const waveAddr=base+0x35, rel=waveAddr-base+4, isPartial=(base>>>24)===0x19&&((base>>>16)&0xff)%0x20===1&&[0x20,0x21,0x22].includes((base>>>8)&0xff)&&(base&0xff)===0;   /* PCM Wave Number = 4 nibbles; only in a digital partial block */
+ if(isPartial&&body.length>=rel+4){const n=((body[rel]<<12)|(body[rel+1]<<8)|(body[rel+2]<<4)|body[rel+3]);editorReadback.set(waveAddr,n)}for(const fn of replyListeners){try{fn(base,body.length-4)}catch{}}arpZoneButtons();ovRefresh();editors.forEach(e=>e.sync())}
 
 const storageKey='jdxi-web-v2';
 function getSaved(){try{return JSON.parse(localStorage.getItem(storageKey))||{}}catch{return {}}}
@@ -435,7 +550,7 @@ const OV_OVERRIDE={
  'analog.lfo.13':{options:OV_LFO},'analog.lfo.16':{options:OV_ONOFF},'analog.lfo.21':{options:OV_ONOFF},
  'analog.lfo.18':{display:ovSemi},'analog.lfo.19':{display:ovSemi},'analog.lfo.20':{display:ovSemi}
 };
-const OV_EXTRA={'digital.osc':[{off:0,label:'Waveform',min:0,max:7}]};
+const OV_EXTRA={};
 const OV_GROUPS={
  digital:[['Oscillator','osc'],['Filter','filterMain'],['Filter envelope (ADSR)','filterEnv'],['Amp','ampMain'],['Amp envelope (ADSR)','ampEnv'],['Pitch envelope','pitchEnv'],['LFO','lfo'],['Tone common','commonMain']],
  analog:[['Oscillator','osc'],['Filter','filter'],['Filter envelope (ADSR)','filterEnv'],['Amp','amp'],['Amp envelope (ADSR)','ampEnv'],['Pitch envelope','pitchEnv'],['LFO','lfo']]
@@ -446,7 +561,7 @@ function ovType(){return ovKind()==='analog'?'analog':'digital'}
 function ovBase(){return editorBases[ovKind()]}
 function ovAddr(group,off){return ovBase()+(ovType()==='digital'&&group!=='commonMain'?0x2000+0x100*(+$('ovpartial').value):0)+off}
 const OV_ESS={
- digital:{osc:[0,3,4],filterMain:[10,11,12,15,20],filterEnv:'all',ampMain:[21,27],ampEnv:'all',lfo:[28,29,34,35,36],commonMain:[12,20]},
+ digital:{osc:[0,1,3,4,52,53],filterMain:[10,11,12,15,20],filterEnv:'all',ampMain:[21,27],ampEnv:'all',lfo:[28,29,34,35,36],commonMain:[12,20]},
  analog:{osc:[22,31,23,24],filter:[32,33,35,41],filterEnv:'all',amp:[42],ampEnv:'all',lfo:[13,14,18,19,20]}
 };
 function ovParams(group){
@@ -474,8 +589,9 @@ function ovBuild(){
    const name=document.createElement('span');name.textContent=p.label;
    const out=document.createElement('output');
    let ctrl;
-   const show=()=>{const v=+ctrl.value;out.textContent=ov.options?'':(ov.display?ov.display(v):String(v))};
-   if(ov.options){ctrl=document.createElement('select');ov.options.forEach((t,i)=>{const o=document.createElement('option');o.value=p.min+i;o.textContent=t;ctrl.append(o)});ctrl.value=p.min}
+   const opts=ov.options||p.options;
+   const show=()=>{const v=+ctrl.value;out.textContent=opts?'':(ov.display?ov.display(v):String(v))};
+   if(opts){ctrl=document.createElement('select');opts.forEach((t,i)=>{const o=document.createElement('option');o.value=p.min+i;o.textContent=t;ctrl.append(o)});ctrl.value=p.min}
    else{ctrl=document.createElement('input');ctrl.type='range';ctrl.min=p.min;ctrl.max=p.max;ctrl.value=p.min}
    ctrl.disabled=true;
    let last=null,lastT=0;
@@ -483,10 +599,16 @@ function ovBuild(){
     const v=+ctrl.value;if(v===last)return;
     const linked=$('ovlink').checked&&type==='digital'&&group!=='commonMain';
     const addrs=linked?[0,1,2].map(i=>ovBase()+0x2000+0x100*i+p.off):[addr];
+    const payload=p.bytes===4?[(v>>12)&15,(v>>8)&15,(v>>4)&15,v&15]:[v];   /* PCM Wave Number is 4 nibble bytes */
     try{
-     if(!sendEditor(18,addrs[0],[v]))return;
+     if(!sendEditor(18,addrs[0],payload))return;
      last=v;editorReadback.set(addrs[0],v);
-     addrs.slice(1).forEach((a,i)=>setTimeout(()=>{try{if(sendEditor(18,a,[v]))editorReadback.set(a,v)}catch(e){log(e.message)}},10*(i+1)));
+     addrs.slice(1).forEach((a,i)=>setTimeout(()=>{try{if(sendEditor(18,a,payload))editorReadback.set(a,v)}catch(e){log(e.message)}},10*(i+1)));
+     /* choosing PCM while the wave number is OFF would be silent: select wave 001 */
+     if(type==='digital'&&group==='osc'&&p.off===0&&v===7)addrs.forEach((a,i)=>setTimeout(()=>{
+      const wa=a+0x35;
+      if(editorReadback.get(wa)===0){try{if(sendEditor(18,wa,[0,0,0,1])){editorReadback.set(wa,1);const w=ovWidgets.get(wa);if(w){w.set(1);w.show()}}}catch(e){log(e.message)}}
+     },10*(i+1)+20));
     }catch(e){log(e.message)}
    };
    ctrl.oninput=()=>{show();if(card._env)envDraw(card);const t=performance.now();if(ctrl.type==='range'&&t-lastT>40){lastT=t;push()}};
@@ -514,7 +636,7 @@ function ovRefresh(){
 function ovRead(silent){
  if(!output||!input||!sysexAllowed){if(!silent)$('ovstatus').textContent='Connect MIDI with SysEx permission and an input first.';return}
  const token=++ovToken,jobs=[[ovBase(),12]];
- for(const [,group] of OV_GROUPS[ovType()]){const params=ovParams(group);if(params.length)jobs.push([ovAddr(group,0),Math.max(...params.map(p=>p.off))+1])}
+ for(const [,group] of OV_GROUPS[ovType()]){const params=ovParams(group);if(params.length)jobs.push([ovAddr(group,0),Math.max(...params.map(p=>p.off+(p.bytes===4?4:1)))])}
  $('ovstatus').textContent='Reading active patch…';
  jobs.forEach(([addr,len],i)=>setTimeout(()=>{
   if(token!==ovToken||!output)return;

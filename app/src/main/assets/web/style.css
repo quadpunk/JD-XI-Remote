@@ -491,3 +491,188 @@ html.viz-full,html.viz-full body{overflow:hidden}
 #topstatus{font-size:12px;opacity:.75;margin-right:auto}
 #topstatus[hidden]{display:none}
 body.top-hidden header,body.top-hidden #mixer{display:none!important}
+
+/* performance: smaller pattern buttons, queue list, transport, punch-in pads */
+.perf-slots{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.perf-slot{gap:5px;padding:9px!important}
+.perf-slot .perf-row{display:flex;gap:6px;align-items:flex-end}
+.perf-slot .perf-row>input{width:64px!important;flex:0 0 64px;padding:.3rem .4rem}
+.perf-slot .perf-row>label{flex:1;margin:0;font-size:10px;gap:2px;color:var(--mut,#9caeb8)}
+.perf-slot .perf-row>label input{padding:.3rem .4rem;width:100%}
+.perf-btns{display:flex;gap:4px}
+.perf-mini{margin:0!important;padding:5px 7px!important;font-size:11px!important;font-weight:700;border-radius:7px;line-height:1.2;white-space:nowrap}
+.perf-btns .perf-mini{flex:1 1 0;min-width:0}
+.perf-slot .perf-go{margin-top:0!important;padding:5px 7px!important;font-size:11px!important}
+.perf-transport{display:flex;align-items:center;gap:10px;margin:8px 0 4px;flex-wrap:wrap}
+.perf-transport button{flex:1 1 140px;max-width:260px;padding:16px 12px;font-size:17px;font-weight:800;letter-spacing:.08em;border-radius:10px}
+.perf-transport .perf-start{background:#1f8a4c!important;border-color:#43c97b;color:#fff}
+.perf-transport .perf-stop{background:#b0353a!important;border-color:#e86a6e;color:#fff}
+.perf-transport button:disabled{opacity:.35;cursor:default}
+.perf-transport.running .perf-start{opacity:.35}
+.perf-transport>span{color:var(--mut,#9caeb8);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.perf-transport.running>span{color:#43c97b;font-weight:700}
+.perf-queue{background:var(--panel2,#1f272c);border:1px solid var(--line,#46535b);padding:8px 10px;margin:6px 0 12px;border-radius:8px}
+.perf-queue ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.perf-qitem{display:flex;align-items:center;gap:8px;padding:5px 8px;background:#00000026;border-left:3px solid var(--line,#46535b);border-radius:6px}
+.perf-qitem.first{border-left-color:var(--amber,#f3a91d)}
+.pq-n{font-weight:800;color:var(--amber,#f3a91d);min-width:1.2em}
+.pq-name{flex:1;min-width:0;font-weight:700;font-size:13px}
+.pq-bars{display:inline-flex;flex-direction:row;align-items:center;gap:4px;margin:0;font-size:12px;color:var(--mut,#9caeb8)}
+.pq-bars input{width:52px;padding:.25rem .35rem}
+.pq-x{padding:4px 9px!important}
+.perf-qempty,.perf-qloop{margin:2px 0;font-size:12px;color:var(--mut,#9caeb8)}
+.perf-qloop{margin-top:6px}
+#perfqclear{margin-top:6px!important}
+.perf-punch{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:8px 0 14px}
+.perf-pad{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:68px;padding:8px 6px!important;border-radius:10px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.perf-pad b{font-size:12px;letter-spacing:.08em}
+.perf-pad small{font-size:10px;font-weight:400;opacity:.75;letter-spacing:.04em}
+.perf-pad.held{background:var(--amber,#f3a91d)!important;border-color:var(--amber,#f3a91d)!important;color:#1a1200;transform:scale(.97)}
+@media(max-width:650px){.perf-btns{gap:3px}.perf-btns .perf-mini{padding:5px 2px!important;font-size:10px!important;letter-spacing:0!important}.perf-slot{padding:7px!important}.perf-transport button{padding:14px 8px;font-size:15px}.perf-qitem{flex-wrap:wrap}}
+
+/* performance: Now 30% / Next 30% / Queue 40% in one row; queue shows ~3 entries, then scrolls */
+.perf-now{grid-template-columns:3fr 3fr 4fr;align-items:stretch}
+.perf-now>div{min-width:0}
+.perf-now strong{font-size:14px;word-break:break-word}
+.perf-now .perf-queue{margin:0;display:flex;flex-direction:column;gap:4px}
+.pq-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.pq-head small{margin:0}
+.pq-head .perf-mini{padding:3px 8px!important}
+.perf-now .perf-queue ol{max-height:112px;overflow-y:auto;overscroll-behavior:contain;padding-right:2px;gap:4px}
+.perf-now .perf-qitem{padding:3px 6px;gap:6px;flex:0 0 auto}
+.perf-now .pq-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perf-now .pq-bars input{width:44px;padding:.15rem .3rem}
+.perf-now .pq-x{padding:2px 7px!important}
+.perf-now .perf-qempty,.perf-now .perf-qloop{margin:0}
+@media(max-width:650px){.perf-now{grid-template-columns:1fr 1fr}.perf-now .perf-queue{grid-column:1/-1}}
+
+/* performance: Now above Next (left column), Queue on the right spanning both rows */
+.perf-now{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);grid-auto-flow:row}
+.perf-now>div:nth-child(1){grid-column:1;grid-row:1}
+.perf-now>div:nth-child(2){grid-column:1;grid-row:2}
+.perf-now>.perf-queue{grid-column:2;grid-row:1/3}
+.perf-now>.perf-bar{grid-column:1/-1;grid-row:3}
+@media(max-width:650px){.perf-now{grid-template-columns:1fr}.perf-now>div:nth-child(1),.perf-now>div:nth-child(2),.perf-now>.perf-queue,.perf-now>.perf-bar{grid-column:1;grid-row:auto}}
+/* timing & clock: sync mode button + readout */
+.perf-syncbox{display:inline-flex;align-items:stretch;gap:6px}
+.perf-syncval{display:inline-flex;align-items:center;min-width:9ch;padding:0 10px;border:1px solid var(--line,#46535b);border-radius:6px;font-weight:700;letter-spacing:.04em;background:var(--panel2,#141c20);color:var(--amber,#f3a91d)}
+.perf-syncval.on{color:#43c97b;border-color:#43c97b}
+.perf-syncval.warn{color:#e86a6e;border-color:#e86a6e}
+
+/* step sequencer: note names styled as a vertical piano keyboard */
+.sq-table th.sq-key{position:sticky;left:0;z-index:1;padding:0 6px!important;height:1.5rem;font-size:.7rem;font-weight:600;line-height:1.5rem;border-radius:3px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;box-shadow:inset 0 -1px 0 rgba(0,0,0,.35)}
+.sq-table th.sq-white{background:#f2f0ea!important;color:#222!important;text-align:right}
+.sq-table th.sq-black{background:linear-gradient(to right,#1b1b1b 0,#1b1b1b 64%,#f2f0ea 64%,#f2f0ea 100%)!important;color:#ddd!important;text-align:left}
+.sq-table th.sq-c{box-shadow:inset 0 -2px 0 #888}
+.sq-table th.sq-key:active{filter:brightness(.8)}
+
+#dbg-out{max-height:26rem;overflow:auto;white-space:pre;font-size:.78rem}
+#debug-fold input{max-width:9rem}
+#debug-fold>*{margin:8px}#debug-fold>summary{margin:0}
+
+/* Dedicated independent JD-Xi part ARP switches */
+.arp-part-switches{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 18px}
+.arp-part-switches button{min-width:125px;padding:12px 16px;font-weight:700;border:1px solid var(--line, #777);border-radius:8px}
+.arp-part-switches button.arp-part-active{border:2px solid #40b891;box-shadow:inset 0 0 0 1px #40b891}
+.arp-part-switches button.arp-part-pending{opacity:.7}
+
+/* JD-Xi Performance — pocket sampler / KO-inspired hardware faceplate, scoped to this page only. */
+#performance.ko-performance{--ko-case:#d7d4cb;--ko-ink:#242624;--ko-deep:#17191b;--ko-accent:#e95e35;--ko-screen:#c7c9a8;--ko-line:#aaa99f;background:transparent;color:var(--ko-ink);padding:0;max-width:1300px;margin:0 auto}
+#performance .ko-machine{position:relative;isolation:isolate;background:linear-gradient(125deg,#e5e2da 0%,#d0ccc3 45%,#c3bfb7 100%);border:1px solid #f1efea;border-bottom-color:#88867e;border-radius:14px;padding:clamp(13px,2.3vw,28px);box-shadow:0 5px 0 #87867f,0 12px 32px #0006,inset 0 1px 2px #fff9;overflow:hidden}
+#performance .ko-machine:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff2 3px 4px);opacity:.22;pointer-events:none;z-index:-1}
+#performance .ko-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 17px;border-bottom:2px solid #373a38;color:#363735;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.13em}
+#performance .ko-brand{font-weight:900;font-size:12px;white-space:nowrap}#performance .ko-brand-mark{font-size:21px;letter-spacing:-.1em;font-weight:1000}#performance .ko-brand-mark span{color:var(--ko-accent);margin:0 3px}#performance .ko-edition{font-weight:700}#performance .ko-power{white-space:nowrap}#performance .ko-power i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e75c35;box-shadow:0 0 6px #e75c3599;margin-right:6px}
+#performance .ko-display-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:18px;margin:18px 0 22px}
+#performance .ko-display{background:#252725;border:3px solid #595c55;border-radius:7px;padding:10px 11px 12px;box-shadow:inset 0 2px 10px #0009,0 2px 1px #fff}
+#performance .ko-display-cap{display:flex;justify-content:space-between;color:#c9c9be;font:700 10px ui-monospace,monospace;letter-spacing:.12em;margin-bottom:9px}
+#performance .ko-display-cap span{color:#939b8b}#performance .ko-display-inner{display:grid;grid-template-columns:1fr .8fr;gap:10px}
+#performance .ko-display-main,#performance .ko-display-next{background:linear-gradient(135deg,#dee3bf,#b1b998);min-height:104px;border-radius:3px;box-shadow:inset 1px 2px 5px #3e4a3488;padding:11px;color:#232c23;font-family:ui-monospace,Consolas,monospace;overflow:hidden}
+#performance .ko-display-next{background:linear-gradient(135deg,#c1c9a8,#a8b193)}#performance .ko-display-inner small{font:700 10px ui-monospace,monospace;display:block;letter-spacing:.09em;margin-bottom:8px;color:#435140}
+#performance .ko-display-inner strong{display:block;font:900 clamp(15px,2.2vw,25px) ui-monospace,monospace;letter-spacing:-.04em;color:#242c25;white-space:normal;overflow-wrap:anywhere}#performance .ko-display-next>span{display:block;font-size:9px;margin-top:8px;font-weight:700;color:#687063}
+#performance .ko-display-bars{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;margin-top:12px}
+#performance .perf-bar{margin-top:9px;height:7px;border-radius:1px;background:#4b5049;border:1px solid #73796f;overflow:hidden;grid-column:auto;grid-row:auto}#performance .perf-bar i{background:var(--ko-accent);box-shadow:0 0 8px var(--ko-accent);height:100%;display:block}
+#performance .ko-transport-panel{display:flex;flex-direction:column;justify-content:center;gap:12px;background:#b9b7ae;border:1px solid #a3a198;box-shadow:inset 0 2px 5px #7f7f7540;border-radius:7px;padding:15px}
+#performance .ko-panel-label,#performance .ko-pad-legend{font:700 10px ui-monospace,monospace;letter-spacing:.13em;color:#454744}#performance .perf-transport{margin:0;gap:12px;align-items:stretch}#performance .perf-transport button{min-width:0;flex:1;max-width:none;margin:0!important;border-radius:6px!important;font:900 15px ui-monospace,monospace;min-height:70px;letter-spacing:.08em;box-shadow:inset 0 3px 2px #fff2,0 5px 0 #676762,0 7px 7px #0003;transition:transform .07s,box-shadow .07s}
+#performance .perf-transport .perf-start{background:#e65c38!important;color:#fff9f3;border:2px solid #ad3d23!important}#performance .perf-transport .perf-stop{background:#393c3d!important;color:#e9e7df;border:2px solid #1d1e1f!important}#performance .perf-transport button:active{transform:translateY(3px);box-shadow:inset 0 3px 4px #0007,0 2px 0 #676762}#performance #perftransporthint{flex-basis:100%;font:700 10px ui-monospace,monospace;color:#424541;min-height:13px}
+#performance .ko-pad-legend{display:flex;align-items:center;gap:7px}#performance .ko-led{display:inline-block;width:7px;height:7px;border-radius:50%;background:#df5f31}#performance .ko-bars-text{margin-left:auto}
+#performance .ko-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:2px solid #686963;padding-top:12px;margin:24px 0 10px}#performance .ko-section-head>div{display:flex;gap:9px;align-items:baseline}#performance .ko-index{font:900 12px ui-monospace,monospace;color:#db5535}#performance .ko-section-head h2{margin:0!important;padding:0!important;background:none!important;border:0!important;font:900 clamp(15px,1.9vw,21px) ui-monospace,monospace;color:#232522;letter-spacing:.035em}#performance .ko-head-detail{font:700 10px ui-monospace,monospace;letter-spacing:.08em;color:#62645c;text-align:right}
+#performance .ko-help{margin:0 0 12px;font-size:12px;color:#5c5e56;max-width:850px}
+#performance .ko-pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.6vw,17px);margin:0 0 18px}
+#performance .ko-pads .perf-pad{position:relative;min-width:0;min-height:clamp(82px,9vw,119px);padding:12px 8px!important;background:linear-gradient(145deg,#424346,#17191c 75%)!important;color:#f0eee8!important;border:2px solid #101114!important;border-top-color:#646467!important;border-radius:8px!important;box-shadow:inset 0 2px 1px #ffffff23,inset 0 -3px 2px #080a0bcc,0 6px 0 #7a7972,0 8px 6px #0005;transition:transform .07s,box-shadow .07s,background .1s;touch-action:none;user-select:none}
+#performance .ko-pads .perf-pad:before{content:"";width:5px;height:5px;position:absolute;top:10px;left:11px;background:#555a57;border-radius:50%;box-shadow:0 0 0 1px #191a19}
+#performance .ko-pads .perf-pad:nth-child(4n+2):before,#performance .ko-pads .perf-pad:nth-child(4n+4):before{background:#db603a;box-shadow:0 0 5px #ed5e35}
+#performance .ko-pads .perf-pad b{font:900 clamp(10px,1.18vw,14px) ui-monospace,Consolas,monospace;letter-spacing:.035em;text-align:center;overflow-wrap:anywhere}#performance .ko-pads .perf-pad small{font:500 10px ui-monospace,monospace;color:#b8bbb6;letter-spacing:0;text-align:center}
+#performance .ko-pads .perf-pad.held,#performance .ko-pads .perf-pad:active{transform:translateY(4px) scale(.99);background:linear-gradient(140deg,#e98150,#cc4226)!important;color:#fff!important;box-shadow:inset 0 3px 7px #671b17aa,0 2px 0 #7a7972,0 3px 3px #0004}
+#performance .ko-pads .perf-pad.held small{color:#fff2dd}#performance .ko-pads .perf-pad:focus-visible{outline:3px solid #ed5d35;outline-offset:3px}
+#performance .perf-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0}#performance .perf-slots .perf-slot{background:linear-gradient(#d9d7d1,#bfbbb3)!important;color:#272927!important;border:1px solid #99978f!important;border-radius:7px!important;box-shadow:0 4px 0 #8a887e,0 6px 5px #0003!important;padding:12px!important}#performance .perf-slot strong{font:900 13px ui-monospace,monospace;color:#323331!important;letter-spacing:.08em}#performance .perf-slot label{color:#494c48!important}#performance .perf-slot input{color:#333!important;background:#eae9df!important;border:1px solid #a4a49c!important;border-radius:3px!important}#performance .perf-slot button{border-radius:5px!important;background:#333538!important;color:#f3f0e8!important;border:1px solid #1e1e21!important;font-weight:800}#performance .perf-slot .perf-go{background:#e65f37!important;border:1px solid #ad3d23!important}#performance .perf-slot button:active{filter:brightness(1.13)}
+#performance .perf-queue{margin:0 0 22px;background:#bec0b1!important;color:#273029!important;border:2px solid #8c9186!important;border-radius:5px!important;box-shadow:inset 0 2px 6px #6b766d55;padding:13px 15px}#performance .pq-head{display:flex;align-items:center;justify-content:space-between}#performance .perf-queue small{font:900 11px ui-monospace,monospace;color:#303a32}#performance .perf-qempty,#performance .perf-qloop{color:#48574b}#performance .perf-qitem{background:#e1e1d1!important;border-left-color:#d65d35;color:#343b35}#performance .pq-name{color:#272a27}#performance .perf-queue button{background:#343734;color:#fff}
+#performance .ko-settings{background:#c5c2b8;border:1px solid #a09f97;border-radius:6px;overflow:hidden;margin-top:18px}#performance .ko-settings summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 15px;cursor:pointer;color:#252725;font:900 13px ui-monospace,monospace;list-style:none;letter-spacing:.07em}#performance .ko-settings summary::-webkit-details-marker{display:none}#performance .ko-settings summary small{font-size:10px;color:#585952}#performance .ko-settings .performance-toolbar{background:#c5c2b8!important;border:0;border-top:1px solid #a5a49a;border-radius:0!important;color:#282a27!important}#performance .ko-settings label{color:#30312c!important}#performance .ko-settings select,#performance .ko-settings input{background:#eceadf!important;color:#232522!important;border:1px solid #99988e!important}#performance .ko-settings button{color:#f9f6ed;background:#363836;border-color:#51534d}#performance #perfstatus{color:#4a483b}#performance #perfhelp{margin:8px 15px 14px;color:#4b4d45}
+#performance .ko-footer{display:flex;justify-content:space-between;gap:10px;margin-top:19px;color:#5a5c56;border-top:1px solid #a4a49c;padding-top:11px;font:800 10px ui-monospace,monospace;letter-spacing:.12em}
+@media(max-width:780px){#performance .ko-display-row{grid-template-columns:1fr}#performance .ko-transport-panel{padding:12px}#performance .perf-transport button{min-height:57px}#performance .perf-slots{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){#performance .ko-machine{padding:12px;border-radius:9px}#performance .ko-edition{display:none}#performance .ko-topline{padding-bottom:10px}#performance .ko-display-row{gap:9px;margin:10px 0 14px}#performance .ko-display{padding:8px}#performance .ko-display-main,#performance .ko-display-next{padding:8px;min-height:86px}#performance .ko-display-inner strong{font-size:16px}#performance .ko-pads{gap:8px}#performance .ko-pads .perf-pad{min-height:78px;padding:9px 4px!important;border-radius:6px!important}#performance .ko-pads .perf-pad b{font-size:10px;line-height:1.22}#performance .ko-pads .perf-pad small{font-size:8px;line-height:1.1}#performance .ko-head-detail{font-size:8px}#performance .ko-section-head h2{font-size:14px}#performance .perf-slots{gap:8px}#performance .perf-slots .perf-slot{padding:8px!important}#performance .ko-settings summary small{font-size:8px}#performance .ko-footer{font-size:8px}}
+
+/* Performance LCD: reserve exactly two lines so bar/beat updates never shift the layout. */
+#performance .ko-display-inner strong{
+  line-height:1.2;
+  height:2.4em;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+}
+
+/* V34 — spring-loaded touch / mouse MIDI performance wheels */
+#performance .ko-live-control-row{display:grid;grid-template-columns:164px minmax(0,1fr);gap:clamp(9px,1.8vw,20px);align-items:stretch}
+#performance .ko-live-control-row>.ko-pads{margin:0 0 18px}
+#performance .ko-wheels{align-self:stretch;display:flex;flex-direction:column;gap:10px;margin-bottom:18px;padding:12px 10px;background:#bbb8af;border:1px solid #929087;border-radius:7px;box-shadow:inset 0 2px 4px #7776;color:#30312e;min-width:0}
+#performance .ko-wheel-heading{font:900 11px ui-monospace,monospace;letter-spacing:.07em;display:flex;flex-direction:column;gap:2px}#performance .ko-wheel-heading span{font:700 8px ui-monospace,monospace;color:#66675f}
+#performance .ko-wheel-part{display:flex;align-items:center;justify-content:space-between;gap:5px;font:800 10px ui-monospace,monospace;color:#43453f}
+#performance .ko-wheel-part select{min-width:0;width:98px;padding:5px 2px!important;background:#deddd3!important;color:#292c29!important;border:1px solid #8f9086!important;font:800 11px ui-monospace,monospace}
+#performance .ko-wheel-pair{display:flex;flex:1;justify-content:space-around;gap:8px;min-height:220px}
+#performance .ko-wheel-unit{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+#performance .ko-wheel-name{font:900 10px ui-monospace,monospace;letter-spacing:.08em}
+#performance .ko-wheel-track{position:relative;width:46px;flex:1;min-height:145px;background:linear-gradient(90deg,#1d1e20,#303134 45%,#17191b);border:3px solid #67665e;border-radius:9px;box-shadow:inset 0 3px 8px #000a,0 1px 1px #fff8;touch-action:none;user-select:none;cursor:ns-resize;outline-offset:3px}
+#performance .ko-wheel-track:focus-visible{outline:3px solid var(--ko-accent)}
+#performance .ko-wheel-track .ko-wheel-center{position:absolute;left:3px;right:3px;top:50%;height:1px;background:#86878377;pointer-events:none}
+#performance .ko-wheel-thumb{position:absolute;left:3px;right:3px;height:48px;bottom:calc((100% - 48px) * var(--wheel-position, 0));transform:none;border-radius:6px;background:linear-gradient(90deg,#34373b 0%,#707174 18%,#3e4044 50%,#222427 90%);border:1px solid #111216;box-shadow:inset 0 2px 1px #a1a4a466,0 3px 5px #000a;pointer-events:none;transition:bottom .1s ease-out}
+#performance .ko-pitch-wheel{--wheel-position:.50003}
+#performance .ko-wheel-track.dragging .ko-wheel-thumb{transition:none;border-color:#f36a43}
+#performance .ko-wheel-value{font:900 10px ui-monospace,monospace;white-space:nowrap;color:#383a36}
+#performance .ko-wheel-foot{margin-top:auto;text-align:center;font:800 8px ui-monospace,monospace;letter-spacing:.07em;color:#66685f}
+@media(max-width:700px){#performance .ko-live-control-row{grid-template-columns:1fr}#performance .ko-wheels{flex-direction:row;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:0}#performance .ko-wheel-heading{width:100%}#performance .ko-wheel-pair{flex:0 0 auto;min-height:144px;gap:15px}#performance .ko-wheel-track{height:112px;min-height:112px;width:44px}#performance .ko-wheel-part{align-self:flex-start}#performance .ko-wheel-foot{margin-left:auto}#performance .ko-live-control-row>.ko-pads{margin-top:10px}}
+
+/* V36: compact transport + spring wheels together, including phone layouts. */
+#performance .ko-transport-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch;min-width:0}
+#performance .ko-transport-controls .perf-transport{display:flex;align-items:stretch;flex-wrap:wrap;align-content:center;min-width:0;gap:7px}
+#performance .ko-transport-controls .perf-transport button{flex:1 1 70px;min-width:0;min-height:64px;padding:9px 4px!important}
+#performance .ko-transport-controls .perf-transport #perftransporthint{flex:0 0 100%;min-height:12px}
+#performance .ko-transport-controls .ko-wheels{margin:0;align-self:stretch;display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 9px;min-width:0;width:146px}
+#performance .ko-transport-controls .ko-wheel-heading{width:100%;font-size:9px;white-space:nowrap}
+#performance .ko-transport-controls .ko-wheel-heading span{display:none}
+#performance .ko-transport-controls .ko-wheel-pair{flex:none;display:flex;min-height:0;gap:12px;justify-content:center;width:100%}
+#performance .ko-transport-controls .ko-wheel-unit{gap:3px}
+#performance .ko-transport-controls .ko-wheel-track{width:34px;flex:none;height:85px;min-height:85px;border-width:2px}
+#performance .ko-transport-controls .ko-wheel-thumb{height:26px;bottom:calc((100% - 26px) * var(--wheel-position, 0))}
+#performance .ko-transport-controls .ko-wheel-name,#performance .ko-transport-controls .ko-wheel-value{font-size:9px}
+#performance .ko-transport-controls .ko-wheel-part{align-self:stretch;width:100%;gap:4px;font-size:9px}
+#performance .ko-transport-controls .ko-wheel-part select{width:100%;min-width:0;flex:1;padding:4px 2px!important;font-size:10px}
+#performance .ko-transport-controls .ko-wheel-foot{margin:0;font-size:7px}
+#performance #perfpunch.ko-pads{margin:0 0 18px;width:100%}
+@media(max-width:700px){
+ #performance .ko-transport-controls{grid-template-columns:minmax(0,1fr) 118px;gap:7px}
+ #performance .ko-transport-controls .ko-wheels{width:118px;padding:6px 4px;gap:4px;flex-direction:column;flex-wrap:nowrap}
+ #performance .ko-transport-controls .ko-wheel-heading{font-size:8px;text-align:center}
+ #performance .ko-transport-controls .ko-wheel-pair{gap:10px}
+ #performance .ko-transport-controls .ko-wheel-track{width:31px;height:78px;min-height:78px}
+ #performance .ko-transport-controls .perf-transport{gap:6px}
+ #performance .ko-transport-controls .perf-transport button{min-height:54px;font-size:12px;letter-spacing:0;padding:5px 2px!important}
+ #performance .ko-transport-controls .ko-wheel-foot{display:none}
+}
+@media(max-width:370px){
+ #performance .ko-transport-controls{grid-template-columns:minmax(0,1fr) 104px;gap:5px}
+ #performance .ko-transport-controls .ko-wheels{width:104px}
+ #performance .ko-transport-controls .ko-wheel-pair{gap:7px}
+ #performance .ko-transport-controls .ko-wheel-track{width:29px;height:70px;min-height:70px}
+ #performance .ko-transport-controls .perf-transport button{font-size:10px}
+}
