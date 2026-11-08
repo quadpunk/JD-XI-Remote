@@ -1,0 +1,1 @@
+V39 theme consistency audit. Corrects panel, field, header, mixer, sequencer, editor, FX, debug/log and keyboard colors on KO Light / KO Dark / Light / Ocean across all pages. Independent Performance look preserved. No MIDI changes. Browser/device rendering not verified.

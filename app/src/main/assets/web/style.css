@@ -734,3 +734,110 @@ header .ui-scale-pick select{min-width:74px;max-width:100px;padding:6px 8px}
 :root[data-performance-look="dark"] #performance .ko-footer{border-color:#606166}
 :root[data-performance-look="dark"] #performance .ko-look-picker select{background:#3b3d41;color:#f2eee6;border-color:#77777d}
 @media(max-width:520px){#performance .ko-look-picker{font-size:9px;gap:5px;flex-wrap:wrap}#performance .ko-look-picker select{min-width:105px;max-width:155px}}
+
+/* V39 – shared surface and legibility system across ALL editor pages.
+   Performance retains its separately selectable KO Light/Dark machine skin. */
+:root[data-theme="ko-light"]{
+ --ui-page:#ebe7de;--ui-card:#f6f2e9;--ui-raised:#dfdacd;
+ --ui-field:#fffdf7;--ui-heading:#353530;--ui-heading-ink:#faf8f0;
+ --ui-text:#252723;--ui-secondary:#4d5049;--ui-border:#aaa397;
+ --ui-accent:#b33c20;--ui-accent-ink:#fff;--ui-screen:#c9cead;
+}
+:root[data-theme="ko-dark"]{
+ --ui-page:#212326;--ui-card:#303237;--ui-raised:#292b2f;
+ --ui-field:#373a40;--ui-heading:#121416;--ui-heading-ink:#f4f0e8;
+ --ui-text:#f3efe8;--ui-secondary:#d1cbc1;--ui-border:#64666c;
+ --ui-accent:#ff805b;--ui-accent-ink:#18191a;--ui-screen:#a3ae91;
+}
+/* Legacy light/ocean were missing styling for most page containers. */
+:root[data-theme="light"]{
+ --ui-page:#f4f7fb;--ui-card:#fff;--ui-raised:#e3ebf2;
+ --ui-field:#fff;--ui-heading:#2f495e;--ui-heading-ink:#fff;
+ --ui-text:#182332;--ui-secondary:#415267;--ui-border:#9eafbf;
+ --ui-accent:#155f86;--ui-accent-ink:#fff;--ui-screen:#e8eff5;
+}
+:root[data-theme="ocean"]{
+ --ui-page:#092634;--ui-card:#103b4d;--ui-raised:#0b3040;
+ --ui-field:#103b4d;--ui-heading:#0b4252;--ui-heading-ink:#e8fbff;
+ --ui-text:#e0f8ff;--ui-secondary:#c0e0e8;--ui-border:#357b8f;
+ --ui-accent:#44b9c9;--ui-accent-ink:#061d2b;--ui-screen:#061d2b;
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]){
+ color:var(--ui-text);--ui-focus:var(--ui-accent);
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(.page,.page.active):not(#performance){
+ background:var(--ui-page)!important;color:var(--ui-text)!important;
+ border:1px solid var(--ui-border);box-shadow:none;
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(header,nav,#topstrip,.viz-bar,details.mixer){
+ background:var(--ui-raised)!important;color:var(--ui-text);border-color:var(--ui-border);
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ .paramcard,.channel-card,.performance-toolbar,.performance-parts>*,.performance-fx>*,
+ .mixstrip,.mixpanel,.fx-strip,.sq-table,.sq-scroll,.patchlist button,
+ .fold-body,details.advanced,details.midi-fold,#midi-details,#debug-fold,
+ .overview>*,.perf-slot,.perf-queue,.dashboard-grid>*,.uplist>*,.dx-groups>*
+ ){
+ background:var(--ui-card)!important;color:var(--ui-text);border-color:var(--ui-border)!important;
+ box-shadow:none;
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ .page:not(#performance) h1,.page:not(#performance) h2,
+ details.advanced>summary,details.mixer>summary,details.midi-fold>summary,
+ #midi-details>summary,#debug-fold>summary,.fold-head
+ ){
+ background:var(--ui-heading)!important;color:var(--ui-heading-ink)!important;
+ border-color:var(--ui-border);
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ button,select,input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),textarea
+ ){
+ background:var(--ui-field);color:var(--ui-text);border-color:var(--ui-border);
+}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ p,li,label,.ovrow,.midi-env,.midi-env *,header small,#status,#topstatus,
+ #mixstatus,.performance-note,.perf-qempty,.perf-qloop,.paramcard p,
+ .mixer-foot,.performance-toolbar label,#midi-diagnostics,#dxstatus,#upstatus,footer
+ ){color:var(--ui-secondary)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ .paramcard strong,.channel-card strong,.mixhead strong,.mixhead output,
+ .paramcard output,.ovrow output,#ovname,.pq-name,.performance-parts input
+ ){color:var(--ui-text)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ pre,#dashlog,#midi-log,#dbg-out,.envsvg,.perf-bar
+ ){background:var(--ui-screen);color:var(--ui-text);border-color:var(--ui-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(
+ button:not(.danger):not(.perf-pad):not(.ko-transport-panel button):hover,
+ nav button.active
+ ){background:var(--ui-accent)!important;color:var(--ui-accent-ink)!important;border-color:var(--ui-accent)!important}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(button,select,input,textarea):focus-visible{outline:2px solid var(--ui-focus);outline-offset:2px}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(input[type="range"],input[type="checkbox"],input[type="radio"]){accent-color:var(--ui-accent)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) .editor-control input.editor-toggle{
+ background:var(--ui-raised);border-color:var(--ui-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) .editor-control input.editor-toggle:checked{background:var(--ui-accent);border-color:var(--ui-accent)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) .editor-control input.editor-toggle:after{background:var(--ui-text)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) .editor-control input.editor-toggle:checked:after{background:var(--ui-heading-ink)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(.keyboard,.piano){background:var(--ui-raised);border-color:var(--ui-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(.stepbtn,.sq-table button,.steps button){border-color:var(--ui-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) .sq-table button[aria-pressed="true"],
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) .steps button.on{background:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) :is(#topstrip,#viz,#mixer){color:var(--ui-text)}
+/* The dedicated Performance look must NEVER inherit the generic page panel.
+   Its own dark/light KO machine styling is kept independent of Appearance. */
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"],[data-theme="light"],[data-theme="ocean"]) #performance.ko-performance{
+ background:transparent!important;color:var(--ko-ink);border:0!important;box-shadow:none!important;
+}
+/* The global input skin must not bleed through the independently styled machine. */
+:root[data-performance-look="light"] #performance .ko-look-picker select{
+ background:#ece8de!important;color:#262822!important;border-color:#929088!important;
+}
+:root[data-performance-look="dark"] #performance .ko-look-picker select{
+ background:#3b3d41!important;color:#f2eee6!important;border-color:#77777d!important;
+}
+:root[data-performance-look="light"] #performance .ko-settings :is(input,select){
+ background:#eceadf!important;color:#232522!important;border-color:#99988e!important;
+}
+:root[data-performance-look="dark"] #performance .ko-settings :is(input,select){
+ background:#3b3c40!important;color:#f2ede5!important;border-color:#6b6c72!important;
+}
+/* Legacy dark/Droid/Cybergreen/Studio/Pocket retain their intentionally distinct palettes. */
