@@ -52,6 +52,16 @@ val PALETTES: Map<String, Palette> = mapOf(
         c(0x30B5D1), c(0xF3A91D), c(0xE33F43), c(0x6FD08C), c(0xF3A91D)),
     "light" to Palette(false, c(0xF4F7FB), c(0xFFFFFF), c(0xE3EBF2), c(0x9EAEBF), c(0xE8EFF5), c(0xD9E3EC), c(0x182332), c(0x425468),
         c(0x1789AC), c(0xD97A00), c(0xD0453F), c(0x2F9A55), c(0xD97A00)),
+    // KO palettes mirror the web UI's v39 --ui-* tokens. Without these, the native
+    // Step Sequencer falls back to the Android palette even though the WebView switches.
+    "ko-light" to Palette(false,
+        c(0xEBE7DE), c(0xF6F2E9), c(0xDFDACD), c(0xAAA397),
+        c(0xC9CEAD), c(0xE1DCCF), c(0x252723), c(0x4D5049),
+        c(0x2869A5), c(0xA76406), c(0xB33C20), c(0x368368), c(0xB33C20)),
+    "ko-dark" to Palette(true,
+        c(0x212326), c(0x303237), c(0x292B2F), c(0x64666C),
+        c(0x202327), c(0x17191C), c(0xF3EFE8), c(0xD1CBC1),
+        c(0x66B9D9), c(0xFFCB77), c(0xFF805B), c(0x80CDA5), c(0xFF805B)),
     "ocean" to Palette(true, c(0x061D2B), c(0x0B3040), c(0x103B4D), c(0x28788C), c(0x082636), c(0x051A26), c(0xE0F8FF), c(0x8FC3D3),
         c(0x4FD1E8), c(0xFFC857), c(0xFF7A6E), c(0x6FD7A0), c(0xFFC857)),
 )

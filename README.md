@@ -1,9 +1,8 @@
-<img width="2172" height="724" alt="Retro JD-XI Remote Synth Banner" src="https://github.com/user-attachments/assets/2ea8035b-04a3-40e8-a272-e88492b3aef4" />
 # Webapp also available without install for all platforms:
 # https://jdxi-remote.wasmer.app/
 
 # JD-Xi Remote for Android
-Download is under [releases](https://github.com/quadpunk/JD-XI-Remote/releases)
+Download is under releases
 
 **A powerful MIDI controller, sound editor, performance tool and step sequencer for the Roland JD-Xi synthesizer.**
 
