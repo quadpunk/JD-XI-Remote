@@ -1,0 +1,1 @@
+Android v38: Full-app KO Light/Dark appearances, independent Performance Light/Dark/Follow toggle, UI Size retained. See app/src/main/assets/web/THEME_V38_README.md. Requires Android Studio build and real-device test.

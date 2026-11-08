@@ -1,7 +1,7 @@
 /* Minimal service worker: makes the page installable and lets it open offline.
    Network first (so updates arrive immediately), cache as fallback. */
-const CACHE='jdxi-remote-android-v36';
-const SHELL=['./','index.html','style.css','data.js','dx7.js','pattern-midi.js','app.js','mypatches.js','mixer.js','viz.js','stepper.js','performance.js','sequencer.js','fx.js','transfer.js','collapse.js','install.js','manifest.webmanifest','icon-192.png','icon-512.png'];
+const CACHE='jdxi-remote-android-v38-ko-themes';
+const SHELL=['./','index.html','style.css','theme-look.js','ui-scale.js','ui-scale.js','data.js','dx7.js','pattern-midi.js','app.js','mypatches.js','mixer.js','viz.js','stepper.js','performance.js','sequencer.js','fx.js','transfer.js','collapse.js','install.js','manifest.webmanifest','icon-192.png','icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{}));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{

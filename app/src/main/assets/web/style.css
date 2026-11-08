@@ -676,3 +676,61 @@ body.top-hidden header,body.top-hidden #mixer{display:none!important}
  #performance .ko-transport-controls .ko-wheel-track{width:29px;height:70px;min-height:70px}
  #performance .ko-transport-controls .perf-transport button{font-size:10px}
 }
+
+/* Compact header scale selector; zoom uses layout-aware CSS zoom. */
+header .ui-scale-pick{display:inline-flex;vertical-align:middle;margin:0 8px 0 0;gap:4px;white-space:nowrap}
+header .ui-scale-pick select{min-width:74px;max-width:100px;padding:6px 8px}
+@media(max-width:650px){header .ui-scale-pick{margin:0 4px 0 0}header .ui-scale-pick select{min-width:68px}}
+
+/* V38 — KO-inspired full-app appearances. Overrides are intentionally scoped
+   to the two new theme values: previous appearances retain their styling. */
+:root[data-theme="ko-light"]{color-scheme:light;--ko-shell:#d5d1c7;--ko-surface:#e6e2d8;--ko-key:#f5f1e7;--ko-text:#252723;--ko-muted:#53564f;--ko-border:#aaa59a;--ko-accent:#e75c36;--ko-screen:#c9cead;background:#b9b4aa;color:var(--ko-text)}
+:root[data-theme="ko-dark"]{color-scheme:dark;--ko-shell:#17191c;--ko-surface:#292b2e;--ko-key:#33363a;--ko-text:#f4efe5;--ko-muted:#c0bcb2;--ko-border:#515054;--ko-accent:#ff734b;--ko-screen:#a3ae91;background:#101113;color:var(--ko-text)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) body{background:var(--ko-shell);color:var(--ko-text);font-family:ui-monospace,Consolas,system-ui,sans-serif}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(header,nav,#topstrip,.viz-bar){background:var(--ko-surface);color:var(--ko-text);border-color:var(--ko-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(header small,header label,#status,nav button,.viz-bar label){color:var(--ko-muted)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(.page,.paramcard,.channel-card,.performance-toolbar,.mixstrip,.mixpanel,details.advanced,details.mixer,details.midi-fold,.perf-slot,.perf-queue,.sq-table,.patchlist button){background:var(--ko-surface);color:var(--ko-text);border-color:var(--ko-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(button,input,select,textarea){background:var(--ko-key);color:var(--ko-text);border:1px solid var(--ko-border);border-radius:5px}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(label,p,li,.overview,.ovrow,.midi-env,.performance-note){color:var(--ko-muted)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(h1,h2,details.advanced>summary,details.mixer>summary,details.midi-fold>summary){background:var(--ko-text);color:var(--ko-surface);border-radius:3px}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) nav button.active,
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) nav button:hover{background:var(--ko-accent)!important;color:#fff!important;box-shadow:inset 0 -3px 0 #222}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) button:hover{background:var(--ko-accent)!important;color:#fff!important;border-color:var(--ko-accent)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(button,input,select):focus-visible{outline:2px solid var(--ko-accent);outline-offset:2px}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) input[type="range"],:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) input[type="checkbox"]{accent-color:var(--ko-accent)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(.paramcard strong,.channel-card strong,.paramcard output,.performance-parts input){color:var(--ko-text)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) :is(pre,#dashlog,.envsvg){background:var(--ko-key);color:var(--ko-text);border-color:var(--ko-border)}
+:root:is([data-theme="ko-light"],[data-theme="ko-dark"]) #performance{background:transparent;border:0;box-shadow:none}
+:root[data-theme="ko-dark"] .page:not(#performance){box-shadow:0 6px 24px #0008}
+
+/* Performance look can be chosen independently from the global appearance. */
+#performance .ko-look-picker{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:0 0 9px;font:800 10px ui-monospace,monospace;letter-spacing:.08em;color:inherit}
+#performance .ko-look-picker select{font:800 11px ui-monospace,monospace;letter-spacing:normal;min-width:120px;max-width:185px;padding:5px 8px;background:#e8e3d8;color:#252723;border:1px solid #96948b;border-radius:4px}
+:root[data-performance-look="dark"] #performance.ko-performance{--ko-case:#242528;--ko-ink:#f1eee6;--ko-deep:#111316;--ko-accent:#ff7047;--ko-screen:#a8b398;--ko-line:#525355;color:var(--ko-ink)}
+:root[data-performance-look="dark"] #performance .ko-machine{background:linear-gradient(125deg,#35363a,#24262a 52%,#1b1d20);border:1px solid #515256;border-bottom-color:#0c0d0e;box-shadow:0 5px 0 #101114,0 12px 30px #0009,inset 0 1px 1px #ffffff21}
+:root[data-performance-look="dark"] #performance .ko-machine:before{background:repeating-linear-gradient(0deg,transparent 0 3px,#fff1 3px 4px);opacity:.13}
+:root[data-performance-look="dark"] #performance .ko-topline{border-color:#68686b;color:#e8e5dc}
+:root[data-performance-look="dark"] #performance .ko-transport-panel{background:#303135;border-color:#606067;box-shadow:inset 0 2px 5px #0008}
+:root[data-performance-look="dark"] #performance :is(.ko-panel-label,.ko-pad-legend,#perftransporthint,.ko-head-detail,.ko-help,.ko-footer){color:#c2c0b9}
+:root[data-performance-look="dark"] #performance .ko-section-head{border-color:#77767a}
+:root[data-performance-look="dark"] #performance .ko-section-head h2{color:#f3eee4!important}
+:root[data-performance-look="dark"] #performance .ko-wheels{background:#242629;border-color:#5d5c60;color:#f1ede5;box-shadow:inset 0 2px 4px #0008}
+:root[data-performance-look="dark"] #performance :is(.ko-wheel-heading,.ko-wheel-name,.ko-wheel-value,.ko-wheel-part){color:#eee9de}
+:root[data-performance-look="dark"] #performance .ko-wheel-foot,:root[data-performance-look="dark"] #performance .ko-wheel-heading span{color:#b3b0a8}
+:root[data-performance-look="dark"] #performance .ko-wheel-part select{background:#3b3c40!important;color:#f8f3ec!important;border-color:#696a70!important}
+:root[data-performance-look="dark"] #performance .ko-pads .perf-pad{box-shadow:inset 0 2px 1px #ffffff23,inset 0 -3px 2px #080a0bcc,0 6px 0 #101115,0 8px 6px #0009}
+:root[data-performance-look="dark"] #performance .perf-slots .perf-slot{background:linear-gradient(#393b40,#292b2e)!important;color:#eee9e1!important;border-color:#66676b!important;box-shadow:0 4px 0 #131416,0 6px 5px #0008!important}
+:root[data-performance-look="dark"] #performance .perf-slot :is(strong,label){color:#eee9e1!important}
+:root[data-performance-look="dark"] #performance .perf-slot input{background:#202225!important;color:#f2ede4!important;border-color:#68686d!important}
+:root[data-performance-look="dark"] #performance .perf-queue{background:#30363a!important;color:#f1eee7!important;border-color:#5a6064!important;box-shadow:inset 0 2px 5px #0007}
+:root[data-performance-look="dark"] #performance .perf-queue :is(small,.perf-qempty,.perf-qloop,.pq-name){color:#f1eee7}
+:root[data-performance-look="dark"] #performance .perf-qitem{background:#43494b!important;color:#f5f1e8}
+:root[data-performance-look="dark"] #performance .ko-settings{background:#2d2f33;border-color:#606167}
+:root[data-performance-look="dark"] #performance .ko-settings summary{color:#f1ede5}
+:root[data-performance-look="dark"] #performance .ko-settings summary small{color:#c1bdb6}
+:root[data-performance-look="dark"] #performance .ko-settings .performance-toolbar{background:#292b2e!important;color:#e9e5df!important;border-color:#57595f}
+:root[data-performance-look="dark"] #performance .ko-settings label,:root[data-performance-look="dark"] #performance :is(#perfstatus,#perfhelp){color:#e6e1d8!important}
+:root[data-performance-look="dark"] #performance .ko-settings :is(select,input){background:#3b3c40!important;color:#f2ede5!important;border-color:#6b6c72!important}
+:root[data-performance-look="dark"] #performance .ko-footer{border-color:#606166}
+:root[data-performance-look="dark"] #performance .ko-look-picker select{background:#3b3d41;color:#f2eee6;border-color:#77777d}
+@media(max-width:520px){#performance .ko-look-picker{font-size:9px;gap:5px;flex-wrap:wrap}#performance .ko-look-picker select{min-width:105px;max-width:155px}}

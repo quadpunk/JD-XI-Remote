@@ -229,3 +229,7 @@ All trademarks belong to their respective owners.
 ---
 
 **JD-Xi Remote — More control. More creativity. More from your JD-Xi.**
+
+
+## Interface size (v37)
+Use **Size** next to Appearance to select Auto or 50–150% in 10% increments. Auto uses the screen-responsive layout and is the default. The choice persists locally.
