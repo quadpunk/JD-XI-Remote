@@ -5,6 +5,7 @@
 # JD-Xi Remote for Android
 Download is under [releases](https://github.com/quadpunk/JD-XI-Remote/releases)
 
+Freeze issue? Remember to use Generic USB setting on JD-XI
 
 **A powerful MIDI controller, sound editor, performance tool and step sequencer for the Roland JD-Xi synthesizer.**
 
